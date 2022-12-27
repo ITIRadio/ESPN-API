@@ -156,7 +156,9 @@ def CFB_post_game(game_number):
 	#Print game header, team, scores, etc.
 	
 	print(visitor, "("+visitor_record+") "+visitor_qtrs+"  "+visitor_add_spc, visitor_score)
-	print(home, "("+home_record+") "+home_qtrs+"  "+home_add_spc, home_score, game_status, stadium, "  ", notes)
+	print(home, "("+home_record+") "+home_qtrs+"  "+home_add_spc, home_score, game_status, stadium)
+	if notes != "":
+		print(" "+notes)
 	if headline != "":
 		print (" "+headline)
 
@@ -324,7 +326,7 @@ def CFB_pre_game(game_number):
 	
 	#Make event call for current game, game_number is parm passed into def
 	#No injuries available
-
+	
 	url_event = "http://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=" + CFB_data_json['events'][game_number]['id']
 	CFB_event = urlopen(url_event)
 	CFB_event_data_json = json.loads(CFB_event.read())
@@ -333,10 +335,16 @@ def CFB_pre_game(game_number):
 	
 	stadium = CFB_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
 	home = CFB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
-	home_record = CFB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['records'][0]['summary']
+	
 	visitor = CFB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['displayName']
-	visitor_record = CFB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['records'][0]['summary']
+	
 	game_status = CFB_data_json['events'][game_number]['status']['type']['detail']
+	try:
+		home_record = CFB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['records'][0]['summary']
+		visitor_record = CFB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['records'][0]['summary']
+	except:
+		home_record = ""
+		visitor_record = ""
 	try:
 		weather = CFB_data_json['events'][game_number]['weather']['displayValue']
 		temperature = CFB_data_json['events'][game_number]['weather']['temperature']
@@ -462,7 +470,7 @@ url = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/s
 CFB_today = urlopen(url)
 CFB_data_json = json.loads(CFB_today.read())
 
-for game in range(0, 20):
+for game in range(0, 200):
 	try: 
 		game_state = CFB_data_json['events'][game]['status']['type']['state']
 		if game_state == "post":
