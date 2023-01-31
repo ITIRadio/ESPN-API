@@ -1,5 +1,7 @@
 from urllib.request import urlopen
 import json
+import sys
+import datetime
 
 #Summary: mainline code at bottom, call the ESPN NFL Scoreboard API to get current list of games;
 #There are 4 possible statuses for each game, post-game, during the game, pre-game, or other, usually a game in postponement,
@@ -12,7 +14,7 @@ import json
 #Because Python/Linux display options are far too limited, the Raspberry Pi ticker idea was abandoned,
 #so these stats are dumped to the terminal for viewing or redirection.
 #Most Linux distros have json & urllib libraries installed by default; if using another OS, double check.
-#Usage: python3 ESPNNFLAPIBoxScores.py
+#Usage: python3 ESPNNFLAPIBoxScores.py YYYYMMDD          Date parameter optional, 1 day allowed only, otherwise get games on current scoreboard
 
 #This project is posted under the GNU General Public License v3.0. If you intend to sell a product based on this code, or release a modified version of this code to the public, that code must also carry this license & be released to the public as open source.
 
@@ -119,6 +121,25 @@ def NFL_post_game(game_number):
 			continue
 	if scoring_plays != "Scoring Plays:\n":
 		scoring_plays = scoring_plays[:-2]
+	
+	#Build play-by-play (skip down & distance, often missing; also skipping start time of each play, included in most plays already)
+	
+	drives_plays = " Drives & Play-by-play:\n"
+	for drive in range(0,50):
+		try:
+			drives_plays = drives_plays + " " + NFL_event_data_json['drives']['previous'][drive]['team']['abbreviation'] + " Drive: " + NFL_event_data_json['drives']['previous'][drive]['description'] + ", " + NFL_event_data_json['drives']['previous'][drive]['displayResult'] + ":\n"
+			for plays in range(0,25):
+				try:
+					drives_plays = drives_plays + "   " + NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['text'] + "\n"
+				except IndexError:
+					continue
+			drives_plays = drives_plays + "\n"
+		except (IndexError, KeyError) as api_bad_data_problem:  #Drive Result sometimes throws error, catch as additional exception, just skip as blank ok
+			continue
+	if drives_plays != " Drives & Play-by-play:\n":
+		drives_plays = drives_plays[:-2]           #Delete extra line feeds
+	else:
+		drives_plays = "No play-by-play data available."
 		
 	#Build basic game info, stadium, teams, record, score, final status, headline if available
 
@@ -170,6 +191,9 @@ def NFL_post_game(game_number):
 	print()
 	if scoring_plays != "Scoring Plays:\n":
 		print(scoring_plays)
+	print()
+	print(drives_plays)
+	print("----------------------------------------------------------------------")
 	print()
 
 def NFL_in_progress(game_number):
@@ -447,9 +471,28 @@ def NFL_pre_game(game_number):
 	print()
 
 #Mainline
+#Due to API throttling of requesting more than one day at a time, only 1 day is supported as an optional parameter. Script this program if more than 1 day desired. Due to issues with throttling, wait 1 minute between calls of this program for 1 day of box scores.
 
-url = "http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
-NFL_today = urlopen(url)
+if len(sys.argv) == 2:
+	date_arg = str(sys.argv[1])
+	url = "http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=" + date_arg + "-" + date_arg
+	try:
+		game_date = datetime.datetime(int(date_arg[0:4]), int(date_arg[4:6]), int(date_arg[6:8]))     
+	except:
+		print("Incorrect date format, use YYYYMMDD format.")
+		exit()
+	print("----------------------------------------------------------------------")
+	print("Games of " + game_date.strftime("%B %-d, %Y"))
+	print()
+else:
+	url = "http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard"
+
+try:
+	NFL_today = urlopen(url)
+except:
+	print("No games on this date.")         #If get past datetime above, date is OK, so API error due to no games.
+	exit()
+
 NFL_data_json = json.loads(NFL_today.read())
 
 for game in range(0, 20):

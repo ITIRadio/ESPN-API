@@ -1,5 +1,7 @@
 from urllib.request import urlopen
 import json
+import sys
+import datetime
 
 #Summary: mainline code at bottom, call the ESPN CFB Scoreboard API to get current list of games;
 #There are 4 possible statuses for each game, post-game, during the game, pre-game, or other, usually a game in postponement,
@@ -12,7 +14,7 @@ import json
 #Because Python/Linux display options are far too limited, the Raspberry Pi ticker idea was abandoned,
 #so these stats are dumped to the terminal for viewing or redirection.
 #Most Linux distros have json & urllib libraries installed by default; if using another OS, double check.
-#Usage: python3 ESPNCFBAPIBoxScores.py
+#Usage: python3 ESPNCFBAPIBoxScores.py YYYYMMDD                           #Date parameter is optional, 1 date allowed only
 
 #This project is posted under the GNU General Public License v3.0. If you intend to sell a product based on this code, or release a modified version of this code to the public, that code must also carry this license & be released to the public as open source.
 
@@ -465,9 +467,29 @@ def CFB_pre_game(game_number):
 	print()
 
 #Mainline
+#Due to API throttling of requesting more than one day at a time, only 1 day is supported as an optional parameter. Script this program if more than 1 day desired. Due to issues with throttling, wait 1 minute between calls of this program for 1 day of box scores.
 
-url = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=200"
-CFB_today = urlopen(url)
+if len(sys.argv) == 2:
+	date_arg = str(sys.argv[1])
+	url = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=200&dates=" + date_arg + "-" + date_arg
+	try:
+		game_date = datetime.datetime(int(date_arg[0:4]), int(date_arg[4:6]), int(date_arg[6:8]))     
+			#Python sucks...substring is string[beginning_idx:beginning_idx+len], int cast required for month/days starting with 0 for datetime obj
+	except:
+		print("Incorrect date format, use YYYYMMDD format.")
+		exit()
+	print("----------------------------------------------------------------------")
+	print("Games of " + game_date.strftime("%B %-d, %Y"))
+	print()
+else:
+	url = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=200"
+
+try:
+	CFB_today = urlopen(url)
+except:
+	print("No games on this date.")         #If get past datetime above, date is OK, so API error due to no games.
+	exit()
+
 CFB_data_json = json.loads(CFB_today.read())
 
 for game in range(0, 200):
