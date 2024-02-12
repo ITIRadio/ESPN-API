@@ -1,5 +1,5 @@
 # ESPN-API
-*New MLB box scores available.*
+*New MLB & college basketball box scores available.*
 
 Miscellaneous Python Linux command line utilities to access the ESPN API. Primarily designed for post-game box scores, but they can be used for game preview data as available, and in-game partial box scores.
 
