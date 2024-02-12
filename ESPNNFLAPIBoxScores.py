@@ -16,9 +16,7 @@ from rich.table import Table
 #Within each def, appropriate stats are pulled from the appropriate dictionary, and Python strings are built for display.
 #Because Python/Linux display options are far too limited, the Raspberry Pi ticker idea was abandoned,
 #so these stats are dumped to the terminal for viewing or redirection.
-#Most Linux distros have json & urllib libraries installed by default; if using another OS, double check.
-#Usage: python3 ESPNNFLAPIBoxScores.py YYYYMMDD  Date parameter optional, 1 day allowed only due to data throttling, otherwise get games on current scoreboard
-
+#Usage: python3 ESPNNFLAPIBoxScores.py YYYYMMDD          Date parameter optional, 1 day allowed only, otherwise get games on current scoreboard
 #IMPORTANT:
 #The rich text library must be installed, run the command "pip install rich" if necessary. 
 
@@ -27,10 +25,6 @@ from rich.table import Table
 def NFL_post_game(game_number):
 	
 	#Make event API call & transfer to dictionary. Note that the game number, or id, is passed into the def for the API call
-	#In this API, visiting teams are listed 1st, not 2nd, as in the scoreboard API, then build, in order:
-	#Home team box score stats, visiting team box score stats, home & visiting team passing, rushing, & receiving player stats
-	#For range loops build players until it runs out of players, and for loop is continued out of
-	#There are far too many null data in this REST API, so try/except blocks are necessary & default to blanks as necessary
 	
 	url_event = "http://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=" + NFL_data_json['events'][game_number]['id']
 	NFL_event = urlopen(url_event)
@@ -230,8 +224,6 @@ def NFL_post_game(game_number):
 				continue
 	except:
 		visitor_def_stats = ""
-	
-	#Build scores by quarters, with OT as necessary
 
 	try:
 		home_qtrs = str(int(NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['linescores'][0]['value'])) + " + " + str(int(NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['linescores'][1]['value'])) + " + " + str(int(NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['linescores'][2]['value'])) + " + " + str(int(NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['linescores'][3]['value']))
@@ -256,8 +248,6 @@ def NFL_post_game(game_number):
 		visitor_ot = " "
 	if visitor_ot != " ":
 		visitor_qtrs = visitor_qtrs + " + " +  visitor_ot
-		
-	#Build scoring play list
 	
 	scoring_plays = " Scoring Plays:" + "\n "
 	for play in range(0,20):
@@ -268,19 +258,39 @@ def NFL_post_game(game_number):
 	if scoring_plays != "Scoring Plays:\n":
 		scoring_plays = scoring_plays[:-2]
 	
-	#Build play-by-play (skip down & distance, often missing; also skipping start time of each play, included in most plays already)
-	
 	drives_plays = " Drives & Play-by-play:\n"
 	for drive in range(0,50):
 		try:
 			drives_plays = drives_plays + " " + NFL_event_data_json['drives']['previous'][drive]['team']['abbreviation'] + " Drive: " + NFL_event_data_json['drives']['previous'][drive]['description'] + ", " + NFL_event_data_json['drives']['previous'][drive]['displayResult'] + ":\n"
 			for plays in range(0,25):
 				try:
-					drives_plays = drives_plays + "   " + NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['text'] + "\n"
+					play_down_dist = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['start']['downDistanceText']
+				except:
+					play_down_dist = ""
+				try:
+					play_clock = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['clock']['displayValue']
+				except:
+					play_clock = ""
+				try:
+					play_qtr = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['period']['number']
+				except:
+					play_qtr = ""
+				if play_clock == "" or play_qtr == "":
+					if play_down_dist == "":
+						play_status = ""
+					else:
+						play_status = "(" + play_down_dist + ") "
+				else:
+					if play_down_dist == "":
+						play_status = "(" + play_clock + " - Qtr " + str(play_qtr) + ") "
+					else:
+						play_status = "(" + play_down_dist + ", " + play_clock + " - Qtr " + str(play_qtr) + ") "
+				try:
+					drives_plays = drives_plays + "   " + play_status + NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['text'] + "\n"
 				except IndexError:
 					continue
 			drives_plays = drives_plays + "\n"
-		except (IndexError, KeyError) as api_bad_data_problem:  #Drive Result sometimes throws error, catch as additional exception, just skip as blank ok
+		except (IndexError, KeyError) as api_bad_data_problem: 
 			continue
 	if drives_plays != " Drives & Play-by-play:\n":
 		drives_plays = drives_plays[:-2]
@@ -296,8 +306,6 @@ def NFL_post_game(game_number):
 		article = re.sub(' +', ' ', article)
 		article = re.sub('\r', '', article)
 		article = re.sub('\n\n\n ', '\n', article)
-
-	#Build basic game info, stadium, teams, record, score, final status, headline if available
 
 	stadium = NFL_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
 	home = NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
@@ -315,8 +323,6 @@ def NFL_post_game(game_number):
 		headline = NFL_data_json['events'][game_number]['competitions'][0]['headlines'][0]['shortLinkText']
 	except:
 		headline = ""
-
-	#Add spaces in the first two lines output for the game so that scores are right-justified	
 		
 	visitor_len = len(visitor+" ("+visitor_record+") "+" "+str(visitor_score))
 	home_len = len(home+" ("+home_record+") "+" "+str(home_score))
@@ -327,28 +333,25 @@ def NFL_post_game(game_number):
 		home_add_spc = ""
 		visitor_add_spc = " " * (home_len - visitor_len)
 	
-	#Print game header, team, scores, etc.
-	
 	print(visitor, "("+visitor_record+") "+"  "+visitor_add_spc, visitor_score)
 	print(home, "("+home_record+") "+"  "+home_add_spc, home_score, game_status, stadium)
 	if headline != "":
 		print (" "+headline)
 
-	#Print game stats as available
-
 	print()
 	print(" Score by Quarters")
-	print(" " + NFL_event_data_json['boxscore']['teams'][0]['team']['abbreviation'] + "\t\t" + visitor_qtrs)
-	print(" " + NFL_event_data_json['boxscore']['teams'][1]['team']['abbreviation'] + "\t\t" + home_qtrs)
+	score_by_qtrs = Table(box=None, header_style="default")
+	score_by_qtrs.add_column(NFL_event_data_json['boxscore']['teams'][0]['team']['abbreviation'])
+	score_by_qtrs.add_column(visitor_qtrs)
+	score_by_qtrs.add_row(NFL_event_data_json['boxscore']['teams'][1]['team']['abbreviation'], home_qtrs)
+	console.print(score_by_qtrs)
 	print()
-	
 	console.print(team_stats)
-
 	print()
 	if scoring_plays != "Scoring Plays:\n":
 		print(scoring_plays)
 	print()
-	print(" " + NFL_event_data_json['boxscore']['teams'][0]['team']['abbreviation'] + " Individual Stats:")
+	print(" " + visitor + " Individual Stats:")
 	print(visitor_passing)
 	print(visitor_rushing)
 	print(visitor_receiving)
@@ -359,7 +362,7 @@ def NFL_post_game(game_number):
 	print()
 	console.print(visitor_def_stats)
 	print()
-	print(" " + NFL_event_data_json['boxscore']['teams'][1]['team']['abbreviation'] + " Individual Stats:")
+	print(" " + home + " Individual Stats:")
 	print(home_passing)
 	print(home_rushing)
 	print(home_receiving)
@@ -379,15 +382,11 @@ def NFL_post_game(game_number):
 	print()
 
 def NFL_in_progress(game_number):
-	
-	#Make event call for current game, game_number is parm passed into def
-	
+		
 	url_event = "http://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=" + NFL_data_json['events'][game_number]['id']
 	NFL_event = urlopen(url_event)
 	NFL_event_data_json = json.loads(NFL_event.read())
 	
-	#Build home & visiting team stat lines, plus team in possession & drive stats
-
 	try:
 		home_team_stats = " " + NFL_event_data_json['boxscore']['teams'][1]['team']['abbreviation'] + ": " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue'] + " " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][0]['label'] + ", " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][16]['displayValue'] + "-" + NFL_event_data_json['boxscore']['teams'][1]['statistics'][15]['displayValue'] + " Rushing, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][11]['displayValue'] + ", " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][10]['displayValue'] + " Yds Passing, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][7]['displayValue'] + " Total Yds, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][13]['displayValue'] + " Int, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][14]['displayValue'] + " " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][14]['label'] + "\n" + " " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][21]['displayValue'] + " Fum Lost, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][4]['displayValue'] + " 3rd Downs, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][5]['displayValue'] + " 4th Downs, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][19]['displayValue'] + " Penalties, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][6]['displayValue'] + " Total Plays, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][24]['displayValue'] + " Possession"
 		visitor_team_stats = " " + NFL_event_data_json['boxscore']['teams'][0]['team']['abbreviation'] + ": " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue'] + " " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][0]['label'] + ", " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][16]['displayValue'] + "-" + NFL_event_data_json['boxscore']['teams'][0]['statistics'][15]['displayValue'] + " Rushing, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][11]['displayValue'] + ", " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][10]['displayValue'] + " Yds Passing, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][7]['displayValue'] + " Total Yds, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][13]['displayValue'] + " Int, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][14]['displayValue'] + " " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][14]['label'] + "\n" + " " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][21]['displayValue'] + " Fum Lost, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][4]['displayValue'] + " 3rd Downs, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][5]['displayValue'] + " 4th Downs, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][19]['displayValue'] + " Penalties, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][6]['displayValue'] + " Total Plays, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][24]['displayValue'] + " Possession"
@@ -398,9 +397,7 @@ def NFL_in_progress(game_number):
 		current_drive = ""
 		current_drive_possession = ""
 		visitor_team_stats = ""
-		
-	#Build all player stats
-	
+			
 	home_passing = " Passing: "
 	for player in range(0, 3):
 		try:
@@ -449,8 +446,6 @@ def NFL_in_progress(game_number):
 			continue
 	visitor_receiving = visitor_receiving[:-2]
 	
-	#Build basic game info, stadium, teams, record, score, last play, timeouts, down & distance, time remaining if available
-
 	stadium = NFL_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
 	home = NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
 	home_score = NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['score']
@@ -476,8 +471,6 @@ def NFL_in_progress(game_number):
 		down_distance_ball_on = ""
 	game_status = NFL_data_json['events'][game_number]['status']['type']['detail']
 	
-	#Add spaces in the first two lines output for the game so that scores are right-justified	
-
 	visitor_len = len(visitor+" ("+visitor_record+") " + str(visitor_timeouts) + " T/O  "+str(visitor_score))
 	home_len = len (home+" ("+home_record+") "+str(home_timeouts)+" T/O  "+str(home_score))
 	if visitor_len > home_len:
@@ -486,16 +479,12 @@ def NFL_in_progress(game_number):
 	else:
 		home_add_spc = ""
 		visitor_add_spc = " " * (home_len - visitor_len)
-	
-	#Print game header, team, scores, etc.
-	
+		
 	print(visitor, "("+visitor_record+") " + str(visitor_timeouts) + " T/O   "+visitor_add_spc, visitor_score)
 	print(home, "("+home_record+") "+str(home_timeouts)+" T/O   "+home_add_spc, home_score)
 	if down_distance_ball_on != "":
 		print (" "+down_distance_ball_on)
 	print(" "+game_status, "\n", current_drive_possession+" Ball: "+current_drive, "\n", last_play)
-
-	#Print game stats as available
 	
 	if visitor_team_stats != "":
 		print()
@@ -513,13 +502,9 @@ def NFL_in_progress(game_number):
 
 def NFL_pre_game(game_number):
 	
-	#Make event call for current game, game_number is parm passed into def
-
 	url_event = "http://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=" + NFL_data_json['events'][game_number]['id']
 	NFL_event = urlopen(url_event)
 	NFL_event_data_json = json.loads(NFL_event.read())
-
-	#Build basic game info, stadium, teams, record, weather, broadcast network, odds, over/under if available
 	
 	stadium = NFL_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
 	home = NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
@@ -547,8 +532,6 @@ def NFL_pre_game(game_number):
 	except:
 		odds = ""
 		over_under = ""
-		
-	#Build visiting & home team stat averages
 	
 	try:
 		visitor_stats = " " + NFL_event_data_json['boxscore']['teams'][0]['team']['abbreviation'] + " Stats: "
@@ -573,8 +556,6 @@ def NFL_pre_game(game_number):
 		except IndexError:
 			pass
 	home_stats = home_stats[:-2]
-	
-	#Build visiting & home stat player leaders
 
 	visitor_leaders = " "
 	try:
@@ -587,8 +568,6 @@ def NFL_pre_game(game_number):
 		home_leaders = home_leaders + NFL_event_data_json['leaders'][0]['leaders'][0]['leaders'][0]['athlete']['fullName'] + " " + NFL_event_data_json['leaders'][0]['leaders'][0]['leaders'][0]['displayValue'] + ", " + NFL_event_data_json['leaders'][0]['leaders'][1]['leaders'][0]['athlete']['fullName'] + " " + NFL_event_data_json['leaders'][0]['leaders'][1]['leaders'][0]['displayValue'] + ", " + NFL_event_data_json['leaders'][0]['leaders'][2]['leaders'][0]['athlete']['fullName'] + " " + NFL_event_data_json['leaders'][0]['leaders'][2]['leaders'][0]['displayValue']
 	except:
 		pass
-	
-	#Build visiting & home injury lists
 	
 	visitor_injuries = " Injuries: "
 	for injury in range(0, 10):
@@ -605,8 +584,6 @@ def NFL_pre_game(game_number):
 		except IndexError:
 			pass
 	home_injuries = home_injuries[:-2]
-	
-	#Build last 5 game results for both teams, most recent listed last
 		
 	home_previous_games = " Previous Games: "
 	for game in range(0,5):
@@ -627,8 +604,6 @@ def NFL_pre_game(game_number):
 			continue
 	if visitor_previous_games != " Previous Games: ":
 		visitor_previous_games = visitor_previous_games[:-2]
-		
-	#Print basic game info, then visiting & home team stats, leaders, injuries, & last 5 games
 
 	print(visitor, "("+visitor_record+")", "at", home, "("+home_record+")", "\n", game_status+",", stadium)
 	misc_status = " "
@@ -661,7 +636,6 @@ def NFL_pre_game(game_number):
 	print()
 
 #Mainline
-#Due to API throttling of requesting more than one day at a time, only 1 day is supported as an optional parameter. Script this program if more than 1 day desired. Due to issues with throttling, wait 1 minute between calls of this program for 1 day of box scores.
 
 if len(sys.argv) == 2:
 	date_arg = str(sys.argv[1])
@@ -680,7 +654,7 @@ else:
 try:
 	NFL_today = urlopen(url)
 except:
-	print("No games on this date.")         #If get past datetime above, date is OK, so API error due to no games.
+	print("No games on this date.")
 	exit()
 
 NFL_data_json = json.loads(NFL_today.read())

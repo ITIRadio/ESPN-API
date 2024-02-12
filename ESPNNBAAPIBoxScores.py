@@ -16,9 +16,8 @@ from rich.table import Table
 #Within each def, appropriate stats are pulled from the appropriate dictionary, and Python strings are built for display.
 #Because Python/Linux display options are far too limited, the Raspberry Pi ticker idea was abandoned,
 #so these stats are dumped to the terminal for viewing or redirection.
-#Most Linux distros have json & urllib libraries installed by default; if using another OS, double check.
-#Usage: python3 -u ESPNNBAAPIBoxScores.py YYYYMMDD          Date parameter optional, add 2nd date in same format for a date range, otherwise get games on current scoreboard
-
+#Usage: python3 -u ESPNNBAAPIBoxScores.py YYYYMMDD
+#Date parameter optional, add 2nd date in same format for a date range, otherwise get games on current scoreboard
 #IMPORTANT:
 #The rich text library must be installed, run the command "pip install rich" if necessary. 
 
@@ -31,15 +30,15 @@ def NBA_post_game(game_number):
 	NBA_event = urlopen(event_url)
 	NBA_event_data_json = json.loads(NBA_event.read())
 	
-	console = Console()     #Set up rich text printing object, then build rich text table & define columns
-
+	console = Console()
+	
 	home = NBA_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
 	home_record = NBA_data_json['events'][game_number]['competitions'][0]['competitors'][0]['records'][0]['summary']
 	home_short = NBA_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['shortDisplayName']
 	home_player_stats = Table(box=None, header_style="default")
 	home_player_stats.add_column(home_short + " (" + home_record + ")")
 	home_player_stats.add_column("Min", justify="right")
-	home_player_stats.add_column("FG", justify="right")    
+	home_player_stats.add_column("FG", justify="right")
 	home_player_stats.add_column("3-pt", justify="right")
 	home_player_stats.add_column("FT", justify="right")
 	home_player_stats.add_column("Tot Reb", justify="right")
@@ -51,7 +50,6 @@ def NBA_post_game(game_number):
 	home_player_stats.add_column("Fls", justify="right")
 	home_player_stats.add_column("Pts", justify="right")
 	
-	#Build player stat lines
 	for player in range(0, 20):
 		try:
 			try:
@@ -67,14 +65,13 @@ def NBA_post_game(game_number):
 			player_ast = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][7]
 			player_stl = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][8]                 
 			player_blk = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][9]                 
-			player_to = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][10]                 
+			player_to = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][10]                
 			player_fl = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][11]
 			player_pts = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][13]
 			home_player_stats.add_row(player_name, player_min, player_fg, player_3pt, player_ft, player_reb, player_oreb, player_ast, player_to, player_stl, player_blk, player_fl, player_pts)
 		except IndexError:
 			continue
 
-	#Gather team totals
 	home_score = NBA_data_json['events'][game_number]['competitions'][0]['competitors'][0]['score']
 	home_rebounds = NBA_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue']
 	home_off_reb = NBA_event_data_json['boxscore']['teams'][1]['statistics'][7]['displayValue']
@@ -131,16 +128,16 @@ def NBA_post_game(game_number):
 				player_name = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['displayName']
 			except:
 				player_name = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['shortName']
-			player_min = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][0]                 
+			player_min = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][0]                
 			player_fg = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][1]
 			player_3pt = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][2]
 			player_ft = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][3]
 			player_reb = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][6]
-			player_oreb = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][4]                
+			player_oreb = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][4]               
 			player_ast = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][7]
-			player_stl = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][8]                 
+			player_stl = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][8]                
 			player_blk = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][9]                 
-			player_to = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][10]                 
+			player_to = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][10]                
 			player_fl = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][11]
 			player_pts = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][13]
 			visitor_player_stats.add_row(player_name, player_min, player_fg, player_3pt, player_ft, player_reb, player_oreb, player_ast, player_to, player_stl, player_blk, player_fl, player_pts)
@@ -185,7 +182,7 @@ def NBA_post_game(game_number):
 		headline = NBA_data_json['events'][game_number]['competitions'][0]['headlines'][0]['shortLinkText']
 	except:
 		headline = ""
-	try:
+	try:                           
 		notes = NBA_data_json['events'][game_number]['competitions'][0]['notes'][0]['headline']
 	except:
 		notes=""
@@ -220,6 +217,8 @@ def NBA_post_game(game_number):
 		print(notes)
 	if headline != "":
 		print(headline + "\n")
+	else:                          
+		print()
 
 	console.print(visitor_player_stats)
 	print()
