@@ -32,7 +32,7 @@ def MLB_post_game(game_number):
 	console = Console()
 
 	game_status = MLB_data_json['events'][game_number]['status']['type']['shortDetail']
-	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
+	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state'] + ", A-" + f"{MLB_data_json['events'][game_number]['competitions'][0]['attendance']:,}"
 	home = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
 	visitor = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['displayName']
 	home_short = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['abbreviation']
@@ -64,7 +64,7 @@ def MLB_post_game(game_number):
 		series_status = series_status + series
 	else:
 		series_status = series_status[:-2]
-	if series_status != "":
+	if series_status != "":                      #If notes & series_blank are blank, series_status becomes blank
 		print(series_status)
 	if headline != "":
 		print(" " + headline)
@@ -86,7 +86,7 @@ def MLB_post_game(game_number):
 	for inn in range(0, 20):
 		try:
 			home_inn = home_inn + str(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['linescores'][inn]['value'])) + " "
-		except (IndexError, KeyError) as EndForLoop:
+		except (IndexError, KeyError) as EndForLoop:            #If PPD game, necessary to skip inning loop, similar for pitchers/batters
 			continue
 	for inn in range(0, 20):
 		try:
@@ -381,8 +381,9 @@ def MLB_post_game(game_number):
 	console.print(home_pitching)
 	print()
 	print(home_pitching_details)
-	print()
-	print(article)
+	if article != "":
+		print()
+		print(article)
 	print()
 	print(plays)
 	print("----------------------------------------")
@@ -391,7 +392,7 @@ def MLB_in_progress(game_number):
 
 	console = Console()
 
-	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
+	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state']
 	home = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
 	visitor = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['displayName']
 	game_status = MLB_data_json['events'][game_number]['status']['type']['shortDetail']
@@ -404,7 +405,7 @@ def MLB_in_progress(game_number):
 		home_record = ""
 		visitor_record = ""
 	try:
-		broadcast = MLB_data_json['events'][game_number]['competitions'][0]['broadcasts'][0]['names'][0]
+		broadcast = ", " + MLB_data_json['events'][game_number]['competitions'][0]['broadcasts'][0]['names'][0]
 	except:
 		broadcast = ""
 	try:
@@ -486,7 +487,7 @@ def MLB_in_progress(game_number):
 		batter = ""
 	
 	print(" " + visitor + " (" + visitor_record + ")" + " vs. " + home + " (" + home_record + ")")
-	print (" " + stadium, broadcast)
+	print (" " + stadium + broadcast)
 	series_status = " "
 	if notes != "":
 		series_status = series_status + notes + ", "
@@ -494,7 +495,7 @@ def MLB_in_progress(game_number):
 		series_status = series_status + series
 	else:
 		series_status = series_status[:-2]
-	if series_status != " ":
+	if series_status != "":
 		print(series_status)
 	print()
 	console.print(rhe)
@@ -510,13 +511,21 @@ def MLB_in_progress(game_number):
 
 def MLB_pre_game(game_number):
 	
-	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
+	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state']
 	home = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
 	visitor = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['displayName']
 	game_status = MLB_data_json['events'][game_number]['status']['type']['shortDetail']
 	try:
 		home_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['records'][0]['summary']
 		visitor_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['records'][0]['summary']
+		home_record_list = re.split('[-()]', home_record)
+		visitor_record_list = re.split('[-()]', visitor_record)
+		home_total_games = 0
+		visitor_total_games = 0
+		for i in home_record_list:
+			home_total_games = home_total_games + int(i)
+		for i in visitor_record_list:
+			visitor_total_games = visitor_total_games + int(i)
 	except:
 		home_record = ""
 		visitor_record = ""	
@@ -546,14 +555,36 @@ def MLB_pre_game(game_number):
 	home_short = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['abbreviation']
 	visitor_short = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['abbreviation']
 	
-	home_probable = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['athlete']['displayName']
-	home_probable_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][2]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][1]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][0]['displayValue'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][3]['displayValue'] + " ERA"
+	try:
+		home_probable = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['athlete']['displayName']
+		home_probable_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][2]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][1]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][0]['displayValue'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][3]['displayValue'] + " ERA"
+	except:
+		home_probable = ""
+		home_probable_record = ""
 	
-	visitor_probable = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['athlete']['displayName']
-	visitor_probable_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][2]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][1]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][0]['displayValue'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][3]['displayValue'] + " ERA"
+	try:
+		visitor_probable = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['athlete']['displayName']
+		visitor_probable_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][2]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][1]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][0]['displayValue'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][3]['displayValue'] + " ERA"
+	except:
+		visitor_probable = ""
+		visitor_probable_record = ""
+
+	if home_total_games != 0:
+		home_rpg = " (" + str(round(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue']) / home_total_games, 2)) + ")"
+		home_hpg = " (" + str(round(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue']) / home_total_games, 2)) + ")"
+	else:
+		home_rpg = ""
+		home_hpg = ""
+
+	if visitor_total_games != 0:
+		visitor_rpg = " (" + str(round(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue']) / visitor_total_games, 2)) + ")"
+		visitor_hpg = " (" + str(round(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][0]['displayValue']) / visitor_total_games, 2)) + ")"
+	else:
+		visitor_rpg = ""
+		visitor_hpg = ""
 	
-	home_totals = " Team Totals: " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue'] + " Runs, " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue'] + " Hits, " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][7]['displayValue'] + " Errors, " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][2]['displayValue'] + " Avg., " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][6]['displayValue'] + " ERA"
-	visitor_totals = " Team Totals: " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue'] + " Runs, " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][0]['displayValue'] + " Hits, " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][7]['displayValue'] + " Errors, " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][2]['displayValue'] + " Avg., " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][6]['displayValue'] + " ERA"
+	home_totals = " Team Totals: " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue']) + home_rpg + " Runs, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue']) + home_hpg + " Hits, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][2]['displayValue']) + " Avg., " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][6]['displayValue']) + " ERA"
+	visitor_totals = " Team Totals: " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue']) + visitor_rpg + " Runs, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][0]['displayValue']) + visitor_hpg + " Hits, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][2]['displayValue']) + " Avg., " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][6]['displayValue']) + " ERA"
 	
 	home_leaders = " Team Leaders: " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][0]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][0]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][0]['leaders'][0]['displayValue'] + " Avg., " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][1]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][1]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][1]['leaders'][0]['displayValue'] + " HR, " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][2]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][2]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][2]['leaders'][0]['displayValue'] + " RBI"
 	visitor_leaders = " Team Leaders: " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][0]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][0]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][0]['leaders'][0]['displayValue'] + " Avg., " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][1]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][1]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][1]['leaders'][0]['displayValue'] + " HR, " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][2]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][2]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][2]['leaders'][0]['displayValue'] + " RBI"
@@ -566,7 +597,8 @@ def MLB_pre_game(game_number):
 		series_status = series_status + series
 	else:
 		series_status = series_status[:-2]
-	print(series_status)
+	if series_status != "":
+		print(series_status)
 	misc_status = " "
 	if weather != "" and temperature != "":
 		misc_status = misc_status+weather+", "+str(temperature)+", "
@@ -587,6 +619,7 @@ def MLB_pre_game(game_number):
 	print()
 	
 #Mainline
+#Due to API throttling of requesting more than one day at a time, only 1 day is supported as an optional parameter. Script this program if more than 1 day desired. Due to issues with throttling, wait 1 minute between calls of this program for 1 day of box scores.
 
 if len(sys.argv) == 2:
 	date_arg = str(sys.argv[1])
@@ -604,7 +637,7 @@ else:
 try:
 	MLB_today = urlopen(url)
 except:
-	print("No games on this date.")
+	print("No games on this date.")         #If get past datetime above, date is OK, so API error due to no games.
 	exit()
 
 MLB_data_json = json.loads(MLB_today.read())
