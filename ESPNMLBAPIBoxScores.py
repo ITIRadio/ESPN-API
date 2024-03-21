@@ -397,6 +397,10 @@ def MLB_in_progress(game_number):
 	console = Console()
 
 	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state']
+	try:
+		stadium = stadium + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state']
+	except:
+		pass
 	home = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
 	visitor = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['displayName']
 	game_status = MLB_data_json['events'][game_number]['status']['type']['shortDetail']
@@ -516,6 +520,10 @@ def MLB_in_progress(game_number):
 def MLB_pre_game(game_number):
 	
 	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state']
+	try:
+		stadium = stadium + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state']
+	except:
+		pass
 	home = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
 	visitor = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['displayName']
 	game_status = MLB_data_json['events'][game_number]['status']['type']['shortDetail']
@@ -573,25 +581,44 @@ def MLB_pre_game(game_number):
 		visitor_probable = ""
 		visitor_probable_record = ""
 
+	try:
+		home_total_runs = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue']
+		home_total_hits = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue']
+		visitor_total_runs = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue']
+		visitor_total_hits = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][0]['displayValue']
+	except:
+		home_total_runs = 0
+		home_total_hits = 0
+		visitor_total_runs = 0
+		visitor_total_hits = 9
+	
 	if home_total_games != 0:
-		home_rpg = " (" + str(round(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue']) / home_total_games, 2)) + ")"
-		home_hpg = " (" + str(round(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue']) / home_total_games, 2)) + ")"
+		home_rpg = " (" + str(round(int(home_total_runs) / home_total_games, 2)) + ")"
+		home_hpg = " (" + str(round(int(home_total_hits) / home_total_games, 2)) + ")"
 	else:
 		home_rpg = ""
 		home_hpg = ""
 
 	if visitor_total_games != 0:
-		visitor_rpg = " (" + str(round(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue']) / visitor_total_games, 2)) + ")"
-		visitor_hpg = " (" + str(round(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][0]['displayValue']) / visitor_total_games, 2)) + ")"
+		visitor_rpg = " (" + str(round(int(visitor_total_runs) / visitor_total_games, 2)) + ")"
+		visitor_hpg = " (" + str(round(int(visitor_total_hits) / visitor_total_games, 2)) + ")"
 	else:
 		visitor_rpg = ""
 		visitor_hpg = ""
 	
-	home_totals = " Team Totals: " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue']) + home_rpg + " Runs, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue']) + home_hpg + " Hits, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][2]['displayValue']) + " Avg., " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][6]['displayValue']) + " ERA"
-	visitor_totals = " Team Totals: " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue']) + visitor_rpg + " Runs, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][0]['displayValue']) + visitor_hpg + " Hits, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][2]['displayValue']) + " Avg., " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][6]['displayValue']) + " ERA"
+	try:
+		home_totals = " Team Totals: " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue']) + home_rpg + " Runs, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue']) + home_hpg + " Hits, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][2]['displayValue']) + " Avg., " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][6]['displayValue']) + " ERA"
+		visitor_totals = " Team Totals: " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue']) + visitor_rpg + " Runs, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][0]['displayValue']) + visitor_hpg + " Hits, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][2]['displayValue']) + " Avg., " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][6]['displayValue']) + " ERA"
+	except:
+		home_totals = ""
+		visitor_totals = ""
 	
-	home_leaders = " Team Leaders: " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][0]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][0]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][0]['leaders'][0]['displayValue'] + " Avg., " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][1]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][1]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][1]['leaders'][0]['displayValue'] + " HR, " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][2]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][2]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][2]['leaders'][0]['displayValue'] + " RBI"
-	visitor_leaders = " Team Leaders: " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][0]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][0]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][0]['leaders'][0]['displayValue'] + " Avg., " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][1]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][1]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][1]['leaders'][0]['displayValue'] + " HR, " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][2]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][2]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][2]['leaders'][0]['displayValue'] + " RBI"
+	try:
+		home_leaders = " Team Leaders: " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][0]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][0]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][0]['leaders'][0]['displayValue'] + " Avg., " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][1]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][1]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][1]['leaders'][0]['displayValue'] + " HR, " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][2]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][2]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][2]['leaders'][0]['displayValue'] + " RBI"
+		visitor_leaders = " Team Leaders: " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][0]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][0]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][0]['leaders'][0]['displayValue'] + " Avg., " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][1]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][1]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][1]['leaders'][0]['displayValue'] + " HR, " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][2]['leaders'][0]['athlete']['fullName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][2]['leaders'][0]['athlete']['position']['abbreviation'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['leaders'][2]['leaders'][0]['displayValue'] + " RBI"
+	except:
+		home_leaders = ""
+		visitor_leaders = ""
 
 	print(visitor, "("+visitor_record+")", "at", home, "("+home_record+")", "\n", game_status+",", stadium)
 	series_status = " "
