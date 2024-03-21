@@ -566,19 +566,25 @@ def MLB_pre_game(game_number):
 
 	home_short = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['abbreviation']
 	visitor_short = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['abbreviation']
-	
+
 	try:
 		home_probable = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['athlete']['displayName']
-		home_probable_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][2]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][1]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][0]['displayValue'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][3]['displayValue'] + " ERA"
 	except:
 		home_probable = ""
+		
+	try:
+		home_probable_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][2]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][1]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][0]['displayValue'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['statistics'][3]['displayValue'] + " ERA"
+	except:
 		home_probable_record = ""
 	
 	try:
 		visitor_probable = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['athlete']['displayName']
-		visitor_probable_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][2]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][1]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][0]['displayValue'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][3]['displayValue'] + " ERA"
 	except:
 		visitor_probable = ""
+	
+	try:
+		visitor_probable_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][2]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][1]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][0]['displayValue'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][3]['displayValue'] + " ERA"
+	except:		
 		visitor_probable_record = ""
 
 	try:
