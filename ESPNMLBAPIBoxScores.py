@@ -34,7 +34,7 @@ def MLB_post_game(game_number):
 	game_status = MLB_data_json['events'][game_number]['status']['type']['shortDetail']
 	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
 	try:
-		stadium = stadium + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state'] + ", A-" + f"{MLB_data_json['events'][game_number]['competitions'][0]['attendance']:,}"
+		stadium = stadium + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state'] + ", A-" + f"{MLB_data_json['events'][game_number]['competitions'][0]['attendance']:,}" + ", T-" + MLB_event_data_json['gameInfo']['gameDuration']
 	except:
 		pass
 	home = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
