@@ -638,22 +638,26 @@ def MLB_pre_game(game_number):
 		print(series_status)
 	misc_status = " "
 	if weather != "" and temperature != "":
-		misc_status = misc_status+weather+", "+str(temperature)+", "
+		misc_status = misc_status+weather+", "+str(temperature)
 	if broadcast != "":
-		misc_status = misc_status+broadcast+", "
+		misc_status = misc_status+", "+broadcast
 	if odds != "":
-		misc_status = misc_status+"LINE: "+odds
+		misc_status = misc_status+", "+"LINE: "+odds
 	if misc_status != " ":
 		print(misc_status)
 	print()
 	print(" " + visitor_short + " Probable Starting Pitcher: " + visitor_probable + " (" + visitor_probable_record + ")")
-	print(visitor_totals)
-	print(visitor_leaders)
-	print()
+	if visitor_totals != "":
+		print(visitor_totals)
+	if visitor_leaders != "":
+		print(visitor_leaders)
+		print()
 	print(" " + home_short + " Probable Starting Pitcher: " + home_probable + " (" + home_probable_record + ")")
-	print(home_totals)
-	print(home_leaders)
-	print()
+	if home_totals != "":
+		print(home_totals)
+	if home_leaders != "":
+		print(home_leaders)
+	print("----------------------------------------")
 	
 #Mainline
 #Due to API throttling of requesting more than one day at a time, only 1 day is supported as an optional parameter. Script this program if more than 1 day desired. Due to issues with throttling, wait 1 minute between calls of this program for 1 day of box scores.
