@@ -424,9 +424,14 @@ def MLB_in_progress(game_number):
 		notes = MLB_data_json['events'][game_number]['competitions'][0]['notes'][0]['headline']
 	except:
 		notes = ""
-	balls = MLB_data_json['events'][game_number]['competitions'][0]['situation']['balls']
-	strikes = MLB_data_json['events'][game_number]['competitions'][0]['situation']['strikes']
-	outs = MLB_data_json['events'][game_number]['competitions'][0]['situation']['outs']
+	try:
+		balls = MLB_data_json['events'][game_number]['competitions'][0]['situation']['balls']
+		strikes = MLB_data_json['events'][game_number]['competitions'][0]['situation']['strikes']
+		outs = MLB_data_json['events'][game_number]['competitions'][0]['situation']['outs']
+	except:
+		balls = 0
+		strikes = 0
+		outs = 0
 	home_score = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['score']
 	home_hits = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['hits']
 	home_errors = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['errors']
@@ -438,18 +443,14 @@ def MLB_in_progress(game_number):
 	visitor_inn = ""
 	for inn in range(0, 20):
 		try:
-			home_inn = home_inn + str(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['linescores'][inn]['value'])) + " + "
-		except IndexError:
+			home_inn = home_inn + str(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['linescores'][inn]['value'])) + " "
+		except:
 			continue
-	if home_inn != "":
-		home_inn = home_inn[:-3]
 	for inn in range(0, 20):
 		try:
-			visitor_inn = visitor_inn + str(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['linescores'][inn]['value'])) + " + "
-		except IndexError:
+			visitor_inn = visitor_inn + str(int(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['linescores'][inn]['value'])) + " "
+		except:
 			continue
-	if visitor_inn != "":
-		visitor_inn = visitor_inn[:-3]
 
 	on_first_bool = int(MLB_data_json['events'][game_number]['competitions'][0]['situation']['onFirst'])    # In JSON as boolean, so cast T/F to 1/0
 	on_second_bool = int(MLB_data_json['events'][game_number]['competitions'][0]['situation']['onSecond'])
@@ -484,7 +485,10 @@ def MLB_in_progress(game_number):
 	bso.add_row("Strikes", str(strikes), on_second)
 	bso.add_row("Outs", str(outs), on_third)
 	
-	last_play = " " + MLB_data_json['events'][game_number]['competitions'][0]['situation']['lastPlay']['text']
+	try:
+		last_play = " " + MLB_data_json['events'][game_number]['competitions'][0]['situation']['lastPlay']['text']
+	except:
+		last_play = ""
 	try:
 		pitcher = " Pitcher: " + MLB_data_json['events'][game_number]['competitions'][0]['situation']['pitcher']['athlete']['displayName'] + " " + MLB_data_json['events'][game_number]['competitions'][0]['situation']['pitcher']['summary']
 	except:
@@ -510,7 +514,8 @@ def MLB_in_progress(game_number):
 	print()
 	console.print(bso)
 	print()
-	print(last_play)
+	if last_play != "":
+		print(last_play)
 	if pitcher != "":
 		print(pitcher)
 	if batter != "":
