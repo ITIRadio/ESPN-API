@@ -256,7 +256,7 @@ def MLB_post_game(game_number):
 	visitor_pitching_details = " "
 	for detail in range (0,20):
 		try:
-			visitor_pitching_details = visitor_pitching_details + MLB_event_data_json['boxscore']['teams'][0]['details'][1]['stats'][detail]['abbreviation'] + "-" + MLB_event_data_json['boxscore']['teams'][0]['details'][1]['stats'][detail]['displayValue'] + "\n "
+			visitor_pitching_details = visitor_pitching_details + MLB_event_data_json['boxscore']['teams'][0]['details'][1]['stats'][detail]['displayName'] + "-" + MLB_event_data_json['boxscore']['teams'][0]['details'][1]['stats'][detail]['displayValue'].replace("\n", "") + "\n "
 		except IndexError:
 			continue
 	if visitor_pitching_details != " ":
@@ -265,7 +265,7 @@ def MLB_post_game(game_number):
 	home_pitching_details = " "
 	for detail in range (0,20):
 		try:
-			home_pitching_details = home_pitching_details + MLB_event_data_json['boxscore']['teams'][1]['details'][1]['stats'][detail]['abbreviation'] + "-" + MLB_event_data_json['boxscore']['teams'][1]['details'][1]['stats'][detail]['displayValue'] + "\n "
+			home_pitching_details = home_pitching_details + MLB_event_data_json['boxscore']['teams'][1]['details'][1]['stats'][detail]['displayName'] + "-" + MLB_event_data_json['boxscore']['teams'][1]['details'][1]['stats'][detail]['displayValue'].replace("\n", "") + "\n "
 		except IndexError:
 			continue
 	if home_pitching_details != " ":
@@ -282,7 +282,6 @@ def MLB_post_game(game_number):
 	visitor_pitching.add_column("HR", justify="right", style="default")
 	visitor_pitching.add_column("PC-ST", justify="right", style="default")
 	visitor_pitching.add_column("ERA", justify="right", style="default")
-	visitor_pitching.add_column("PC", justify="right", style="default")		
 	for pitcher in range(0,30):
 		try:
 			pitcher_name = MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][pitcher]['athlete']['displayName']
@@ -295,11 +294,10 @@ def MLB_post_game(game_number):
 			hr = MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][pitcher]['stats'][6]
 			pcst = MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][pitcher]['stats'][7]
 			era = MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][pitcher]['stats'][8]
-			pc = MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][pitcher]['stats'][9]
-			visitor_pitching.add_row(pitcher_name, str(ip), str(h), str(r), str(er), str(bb), str(k), str(hr), str(pcst), str(era), str(pc))
+			visitor_pitching.add_row(pitcher_name, str(ip), str(h), str(r), str(er), str(bb), str(k), str(hr), str(pcst), str(era))
 		except IndexError:
 			continue
-	visitor_pitching.add_row("Totals", str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][0]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][1]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][2]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][3]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][4]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][5]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][6]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][7]), "", str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][9]))
+	visitor_pitching.add_row("Totals", str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][0]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][1]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][2]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][3]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][4]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][5]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][6]), str(MLB_event_data_json['boxscore']['players'][0]['statistics'][1]['totals'][7]), "")
 
 	home_pitching = Table(box=None, header_style="default")
 	home_pitching.add_column(home_short + " Pitching", style="default")
@@ -312,7 +310,6 @@ def MLB_post_game(game_number):
 	home_pitching.add_column("HR", justify="right", style="default")
 	home_pitching.add_column("PC-ST", justify="right", style="default")
 	home_pitching.add_column("ERA", justify="right", style="default")
-	home_pitching.add_column("PC", justify="right", style="default")		
 	for pitcher in range(0,30):
 		try:
 			pitcher_name = MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][pitcher]['athlete']['displayName']
@@ -325,11 +322,10 @@ def MLB_post_game(game_number):
 			hr = MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][pitcher]['stats'][6]
 			pcst = MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][pitcher]['stats'][7]
 			era = MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][pitcher]['stats'][8]
-			pc = MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][pitcher]['stats'][9]
-			home_pitching.add_row(pitcher_name, str(ip), str(h), str(r), str(er), str(bb), str(k), str(hr), str(pcst), str(era), str(pc))
+			home_pitching.add_row(pitcher_name, str(ip), str(h), str(r), str(er), str(bb), str(k), str(hr), str(pcst), str(era))
 		except IndexError:
 			continue
-	home_pitching.add_row("Totals", str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][0]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][1]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][2]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][3]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][4]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][5]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][6]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][7]), "", str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][9]))
+	home_pitching.add_row("Totals", str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][0]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][1]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][2]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][3]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][4]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][5]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][6]), str(MLB_event_data_json['boxscore']['players'][1]['statistics'][1]['totals'][7]), "")
 
 	plays = " Play-by-play:"
 	for play in range(0,2000):
