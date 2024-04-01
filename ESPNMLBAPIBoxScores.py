@@ -333,7 +333,10 @@ def MLB_post_game(game_number):
 			if MLB_event_data_json['plays'][play]['type']['type'] == "start-inning":
 				plays = plays + "\n " + MLB_event_data_json['plays'][play]['text'] + ": "
 			elif MLB_event_data_json['plays'][play]['type']['type'] == "play-result":
-				plays = plays + MLB_event_data_json['plays'][play]['text'] + " "
+				if MLB_event_data_json['plays'][play]['text'][-1] == ".":
+					plays = plays + MLB_event_data_json['plays'][play]['text'] + " "
+				else:
+					plays = plays + MLB_event_data_json['plays'][play]['text'] + ". "
 			else:
 				pass
 		except (IndexError, KeyError) as api_bad_data_problem:
