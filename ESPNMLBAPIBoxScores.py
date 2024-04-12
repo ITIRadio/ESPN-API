@@ -643,8 +643,12 @@ def MLB_pre_game(game_number):
 	misc_status = " "
 	if weather != "" and temperature != "":
 		misc_status = misc_status+weather+", "+str(temperature)
+	else:
+		misc_status = " Forecast N/A"
 	if broadcast != "":
 		misc_status = misc_status+", "+broadcast
+	else:
+		misc_status = misc_status+", No Nat'l TV"
 	if odds != "":
 		misc_status = misc_status+", "+"LINE: "+odds
 	if misc_status != " ":
