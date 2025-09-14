@@ -14,7 +14,8 @@ SELECT display_name as Name,
 team_abbr as Team, 
 SUM(rushes) as Rushes, 
 SUM(yards_rushing) as TotalYards, 
-SUM(tds_rushing) as TDs
+SUM(tds_rushing) as TDs,
+MAX(long) as Long
 FROM rushing
 GROUP BY display_name
 ORDER BY TotalYards DESC;
