@@ -5,8 +5,8 @@ Miscellaneous Python Linux command line utilities to access the ESPN API. Primar
 
 ### *About the new NFL SQLite database utilities:*
 
-1. To set up your own local copy of the SQLite database, run python3 CreateNFLStatsSqliteDB.py (with script in desired database directory).
-2. Updates need to be made daily, run python3 -u ESPNNFLAPISqlite.py YYYYMMDD (date in YYYYMMDD format, with script & database in desired directory). Doing updates the next day after a game day works best.
+1. To set up your own local copy of the SQLite database, run `python3 CreateNFLStatsSqliteDB.py` (with script in desired database directory).
+2. Updates need to be made daily, run `python3 -u ESPNNFLAPISqlite.py YYYYMMDD` (date in YYYYMMDD format, with script & database in desired directory). Doing updates the next day after a game day works best.
 3. Use a SQLite tool (my favorite is DB Browser for SQLite) to access the data and view the schema. There are no foreign keys in the database, as, at least for my application, I'm just doing queries against one table at a time. For example, to view the rushing season totals for carries, total yards, and total touchdowns, grouped by runner, & sorted descending by yards:
 
 ```
