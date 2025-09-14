@@ -3,9 +3,22 @@
 
 Miscellaneous Python Linux command line utilities to access the ESPN API. Primarily designed for post-game box scores, but they can be used for game preview data as available, and in-game partial box scores.
 
-###*About the new NFL SQLite database utilities:*
+### *About the new NFL SQLite database utilities:*
 
+1. To set up your own local copy of the SQLite database, run python3 CreateNFLStatsSqliteDB.py .
+2. Updates need to be made daily, run python3 -u ESPNNFLAPISqlite.py YYYYMMDD (date in YYYYMMDD format).
+3. Use a SQLite tool (my favorite is DB Browser for SQLite) to access the data and view the schema. There are no foreign keys in the database, as, at least for my application, I'm just doing queries against one table at a time. For example, to view the rushing season totals for carries, total yards, and total touchdowns, grouped by runner, sorted descending by yards:
 
+```
+SELECT display_name as Name, 
+team_abbr as Team, 
+SUM(rushes) as Rushes, 
+SUM(yards_rushing) as TotalYards, 
+SUM(tds_rushing) as TDs
+FROM rushing
+GROUP BY display_name
+ORDER BY TotalYards DESC;
+```
 
 ### Other news:
 * Some new fields have been added to the NFL API for this season; those have been included in the box score. Also, previews (run on a given date prior to the games) have been upgraded (abbreviated in-game box scores have been kept).
