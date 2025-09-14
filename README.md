@@ -1,5 +1,5 @@
 # ESPN-API
-### *NFL & CFB now updated for 2025 season, plus new utilities for maintaining NFL SQLite database throughout the season.*
+### *NFL & CFB now updated for 2025 season, plus new utilities for maintaining a NFL SQLite database throughout the season.*
 
 Miscellaneous Python Linux command line utilities to access the ESPN API. Primarily designed for post-game box scores, but they can be used for game preview data as available, and in-game partial box scores.
 
