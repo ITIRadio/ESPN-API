@@ -6,18 +6,6 @@ import re
 from rich.console import Console
 from rich.table import Table
 
-#Summary: mainline code at bottom, call the ESPN MLB Scoreboard API to get current list of games;
-#There are 4 possible statuses for each game, post-game, during the game, pre-game, or other, usually a game in postponement,
-#for which there will be such a status posted, but otherwise default to pre-game status.
-#Then, the game is sent to one of three def's, which will then make another API call for that particular "event", in API terminology.
-#At this point, there are two active Python dictionaries converted from the JSON data retunred from the API calls:
-#1. MLB_data_json, the global dictionary for all games, from which a few stats are pulled,
-#2. MLB_event_data_json, the detailed stats for that particular game being readied for display.
-#Within each def, appropriate stats are pulled from the appropriate dictionary, and Python strings are built for display.
-#Because Python/Linux display options are far too limited, the Raspberry Pi ticker idea was abandoned,
-#so these stats are dumped to the terminal for viewing or redirection.
-#Usage: python3 ESPNMLBAPIBoxScores.py YYYYMMDD
-#Date parameter is optional, 1 date allowed only
 #IMPORTANT:
 #The rich text library must be installed, run the command "pip install rich" if necessary. 
 
@@ -32,6 +20,7 @@ def MLB_post_game(game_number):
 	console = Console()
 
 	game_status = MLB_data_json['events'][game_number]['status']['type']['shortDetail']
+
 	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
 	try:
 		stadium = stadium + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state'] + ", A-" + f"{MLB_data_json['events'][game_number]['competitions'][0]['attendance']:,}" + ", T-" + MLB_event_data_json['gameInfo']['gameDuration']
@@ -148,11 +137,11 @@ def MLB_post_game(game_number):
 				batter_name = MLB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][batter]['athlete']['displayName']
 			else:
 				batter_name = " " + MLB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][batter]['athlete']['displayName']
-			try:                                #Index priming & continue out thru idx 6 ok
+			try:    
 				pos = MLB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][batter]['positions'][0]['abbreviation']
 				for multi_pos in range (1,5):
 					try:
-						pos = pos + "-" +  MLB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][batter]['positions'][multi_pos]['abbreviation']
+						pos = MLB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][batter]['positions'][multi_pos]['abbreviation'] + "-" + pos
 					except:
 						continue
 			except (IndexError, KeyError) as OnePositionOnly:
@@ -196,7 +185,7 @@ def MLB_post_game(game_number):
 				pos = MLB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][batter]['positions'][0]['abbreviation']
 				for multi_pos in range (1,5):
 					try:
-						pos = pos + "-" +  MLB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][batter]['positions'][multi_pos]['abbreviation']
+						pos = MLB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][batter]['positions'][multi_pos]['abbreviation'] + "-" + pos
 					except:
 						continue
 			except (IndexError, KeyError) as OnePositionOnly:
@@ -354,6 +343,19 @@ def MLB_post_game(game_number):
 		article = re.sub('\r', '', article)
 		article = re.sub('\n\n\n ', '\n', article)
 	
+	standings = " "
+	for division in range(0, 2):
+		try:
+			standings = standings + MLB_event_data_json['standings']['groups'][division]['header'] + ": "
+			for team in range(0, 5):
+				try:
+					standings = standings + MLB_event_data_json['standings']['groups'][division]['standings']['entries'][team]['team'] + " " + MLB_event_data_json['standings']['groups'][division]['standings']['entries'][team]['stats'][4]['displayValue'] + "-" + MLB_event_data_json['standings']['groups'][division]['standings']['entries'][team]['stats'][1]['displayValue'] + ", " + MLB_event_data_json['standings']['groups'][division]['standings']['entries'][team]['stats'][3]['displayValue'] + ", " + MLB_event_data_json['standings']['groups'][division]['standings']['entries'][team]['stats'][0]['displayValue'] + " GB, Streak " + MLB_event_data_json['standings']['groups'][division]['standings']['entries'][team]['stats'][2]['displayValue'] + "; "
+				except:
+					continue
+			standings = standings + "\n "
+		except:
+			continue
+	
 	rhe = Table(box=None, header_style="default")
 	rhe.add_column(game_status, style="default")
 	rhe.add_column("", style="default")
@@ -389,13 +391,16 @@ def MLB_post_game(game_number):
 		print(article)
 	print()
 	print(plays)
+	if standings != " ":
+		print()
+		print(standings)
 	print("----------------------------------------")
 
 def MLB_in_progress(game_number):
 
 	console = Console()
 
-	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state']
+	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
 	try:
 		stadium = stadium + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state']
 	except:
@@ -523,7 +528,7 @@ def MLB_in_progress(game_number):
 
 def MLB_pre_game(game_number):
 	
-	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state']
+	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
 	try:
 		stadium = stadium + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state']
 	except:
@@ -570,7 +575,7 @@ def MLB_pre_game(game_number):
 
 	home_short = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['abbreviation']
 	visitor_short = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['abbreviation']
-
+	
 	try:
 		home_probable = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['probables'][0]['athlete']['displayName']
 	except:
@@ -590,7 +595,7 @@ def MLB_pre_game(game_number):
 		visitor_probable_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][2]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][1]['displayValue'] + "-" + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][0]['displayValue'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['probables'][0]['statistics'][3]['displayValue'] + " ERA"
 	except:		
 		visitor_probable_record = ""
-
+	
 	try:
 		home_total_runs = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue']
 		home_total_hits = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue']
@@ -629,7 +634,7 @@ def MLB_pre_game(game_number):
 	except:
 		home_leaders = ""
 		visitor_leaders = ""
-
+	
 	print(visitor, "("+visitor_record+")", "at", home, "("+home_record+")", "\n", game_status+",", stadium)
 	series_status = " "
 	if notes != "":
@@ -690,15 +695,21 @@ except:
 	exit()
 
 MLB_data_json = json.loads(MLB_today.read())
+game_number = 0
 
 for game in range(0, 20):
-	try: 
+	try:
 		game_state = MLB_data_json['events'][game]['status']['type']['state']
 		if game_state == "post":
+			game_number += 1
+			progress_message = "Downloading Game " + str(game_number)
+			print(progress_message, file=sys.stderr, flush=True)
 			MLB_post_game(game)
 		elif game_state == "in":
 			MLB_in_progress(game)
 		else:
 			MLB_pre_game(game)
 	except IndexError:
-		continue
+		break
+
+
