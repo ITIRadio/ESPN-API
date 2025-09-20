@@ -1,5 +1,5 @@
 # ESPN-API
-### *NFL & CFB now updated for 2025 season, plus new utilities for maintaining a NFL SQLite database throughout the season.*
+### *Updates: NFL & CFB now updated for 2025 season, plus new utilities for maintaining a NFL SQLite database throughout the season.*
 
 Miscellaneous Python Linux command line utilities to access the ESPN API. Primarily designed for post-game box scores, but they can be used for game preview data as available, and in-game partial box scores.
 
@@ -20,6 +20,8 @@ FROM rushing
 GROUP BY display_name
 ORDER BY TotalYards DESC;
 ```
+4. A new report, using rich text tables, has also been uploaded. It contains a statistical report for each team, and league leaders tables. Page breaks are included, so redirecting to a text file, and opening the text file in a word processing program, will automatically include page breaks. This will come in handy, as the report is already 84 pages long, as of September 19.
+5. Be aware though, that ESPN is changing the database over for the new week on Tuesday late afternoons, Eastern US Time. During that time, some box scores become temporarily unavailable, and will thus kick out errors. Time your database updates accordingly. The software simply overwrites previously loaded box scores, should a game's statistics be loaded twice.
 
 ### Other news:
 * Some new fields have been added to the NFL API for this season; those have been included in the box score. Also, previews (run on a given date prior to the games) have been upgraded (abbreviated in-game box scores have been kept).
