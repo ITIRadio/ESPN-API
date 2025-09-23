@@ -260,9 +260,10 @@ for team_row in team_cursor:
 	qry_cursor.execute(qry, (abbr,))
 	
 	for qry_row in qry_cursor:
-		comp_pct = qry_row[1] / qry_row[2]
-		yds_per_gm = qry_row[3] / qry_row[6]
-		qry_table.add_row(qry_row[0], str(qry_row[6]), str(qry_row[1]), str(qry_row[2]), f"{comp_pct:2.1%}", str(qry_row[3]), f"{yds_per_gm:.1f}", str(qry_row[4]), str(qry_row[5]), str(qry_row[7]))
+		if qry_row[2] > 0:                                 # ESPN has QB's having a passing entry in games where 1 appears just to hand off
+			comp_pct = qry_row[1] / qry_row[2]
+			yds_per_gm = qry_row[3] / qry_row[6]
+			qry_table.add_row(qry_row[0], str(qry_row[6]), str(qry_row[1]), str(qry_row[2]), f"{comp_pct:2.1%}", str(qry_row[3]), f"{yds_per_gm:.1f}", str(qry_row[4]), str(qry_row[5]), str(qry_row[7]))
 	
 	console.print(qry_table)
 	print()
@@ -288,9 +289,10 @@ for team_row in team_cursor:
 	qry_cursor.execute(qry, (abbr,))
 	
 	for qry_row in qry_cursor:
-		yds_per_gm = qry_row[2] / qry_row[5]
-		yds_per_rush = qry_row[2] / qry_row[1]
-		qry_table.add_row(qry_row[0], str(qry_row[5]), str(qry_row[1]), str(qry_row[2]), f"{yds_per_rush:.1f}", f"{yds_per_gm:.1f}", str(qry_row[3]), str(qry_row[4]), str(qry_row[6]))
+		if qry_row[1] > 0:
+			yds_per_gm = qry_row[2] / qry_row[5]
+			yds_per_rush = qry_row[2] / qry_row[1]
+			qry_table.add_row(qry_row[0], str(qry_row[5]), str(qry_row[1]), str(qry_row[2]), f"{yds_per_rush:.1f}", f"{yds_per_gm:.1f}", str(qry_row[3]), str(qry_row[4]), str(qry_row[6]))
 	
 	console.print(qry_table)
 	print()
@@ -317,12 +319,13 @@ for team_row in team_cursor:
 	qry_cursor.execute(qry, (abbr,))
 	
 	for qry_row in qry_cursor:
-		yds_per_gm = qry_row[2] / qry_row[6]
-		if qry_row[1] != 0:                     # In list if have tgt
-			yds_per_rec = qry_row[2] / qry_row[1]
-		else:
-			yds_per_rec = 0
-		qry_table.add_row(qry_row[0], str(qry_row[6]), str(qry_row[1]), str(qry_row[2]), f"{yds_per_rec:.1f}", f"{yds_per_gm:.1f}", str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[7]))
+		if qry_row[1] > 0:
+			yds_per_gm = qry_row[2] / qry_row[6]
+			if qry_row[1] != 0:                     # In list if have tgt
+				yds_per_rec = qry_row[2] / qry_row[1]
+			else:
+				yds_per_rec = 0
+			qry_table.add_row(qry_row[0], str(qry_row[6]), str(qry_row[1]), str(qry_row[2]), f"{yds_per_rec:.1f}", f"{yds_per_gm:.1f}", str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[7]))
 	
 	console.print(qry_table)
 	print()
@@ -373,8 +376,8 @@ for team_row in team_cursor:
 	qry_cursor.execute(qry, (abbr,))
 	
 	for qry_row in qry_cursor:
-		fg_pct = qry_row[1] / qry_row[2]
-		xp_pct = qry_row[4] / qry_row[5]
+		fg_pct = qry_row[1] / qry_row[2] if qry_row[2] > 0 else 0
+		xp_pct = qry_row[4] / qry_row[5] if qry_row[5] > 0 else 0
 		qry_table.add_row(qry_row[0], str(qry_row[1]), str(qry_row[2]), f"{fg_pct:2.1%}", str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), f"{xp_pct:2.1%}")
 	
 	console.print(qry_table)
@@ -399,7 +402,7 @@ for team_row in team_cursor:
 	qry_cursor.execute(qry, (abbr,))
 	
 	for qry_row in qry_cursor:
-		yds_per_punt = qry_row[2] / qry_row[1]
+		yds_per_punt = qry_row[2] / qry_row[1] if qry_row[1] > 0 else 0
 		qry_table.add_row(qry_row[0], str(qry_row[1]), str(qry_row[2]), f"{yds_per_punt:.1f}", str(qry_row[3]), str(qry_row[4]), str(qry_row[5]))
 	
 	console.print(qry_table)
