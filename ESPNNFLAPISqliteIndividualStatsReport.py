@@ -47,9 +47,9 @@ for team_row in team_cursor:
 		
 		qry = """SELECT game_date, opponent_abbr, home_visitor, completions, attempts, yards_passing, tds_passing, interceptions
 				FROM passing
-				WHERE player_id = ?
+				WHERE player_id = ? AND team_abbr = ?
 				ORDER BY game_date ASC"""
-		gm_cursor.execute(qry, (plyr_id,))
+		gm_cursor.execute(qry, (plyr_id,abbr,))
 		
 		qry_table = Table(box=None, header_style="default")
 		qry_table.add_column(name)
@@ -98,9 +98,9 @@ for team_row in team_cursor:
 		
 		qry = """SELECT game_date, opponent_abbr, home_visitor, rushes, yards_rushing, tds_rushing, long
 				FROM rushing
-				WHERE player_id = ?
+				WHERE player_id = ? AND team_abbr = ?
 				ORDER BY game_date ASC"""
-		gm_cursor.execute(qry, (plyr_id,))
+		gm_cursor.execute(qry, (plyr_id,abbr,))
 		
 		qry_table = Table(box=None, header_style="default")
 		qry_table.add_column("Rushing")
@@ -129,14 +129,14 @@ for team_row in team_cursor:
 		
 		qry = """SELECT game_date, opponent_abbr, home_visitor, receptions, yards_receiving, tds_receiving, long, targets
 				FROM receiving
-				WHERE player_id = ?
+				WHERE player_id = ? AND team_abbr = ?
 				ORDER BY game_date ASC"""
-		gm_cursor.execute(qry, (plyr_id,))
+		gm_cursor.execute(qry, (plyr_id,abbr,))
 		
 		test_retn = gm_cursor.fetchone()
 		
 		if test_retn != None:                     #If a rusher does not have a reception, skip 2nd table
-			gm_cursor.execute(qry, (plyr_id,))
+			gm_cursor.execute(qry, (plyr_id,abbr,))
 		
 			qry_table = Table(box=None, header_style="default")
 			qry_table.add_column("Receiving")
@@ -181,9 +181,9 @@ for team_row in team_cursor:
 		
 		qry = """SELECT game_date, opponent_abbr, home_visitor, receptions, yards_receiving, tds_receiving, long, targets
 				FROM receiving
-				WHERE player_id = ?
+				WHERE player_id = ? AND team_abbr = ?
 				ORDER BY game_date ASC"""
-		gm_cursor.execute(qry, (plyr_id,))
+		gm_cursor.execute(qry, (plyr_id,abbr,))
 	
 		qry_table = Table(box=None, header_style="default")
 		qry_table.add_column("Receiving")
@@ -229,9 +229,9 @@ for team_row in team_cursor:
 	
 		qry = """SELECT game_date, opponent_abbr, home_visitor, fg_made, fg_attempted, long, xp_made, xp_attempted
 				FROM kicking
-				WHERE player_id = ?
+				WHERE player_id = ? AND team_abbr = ?
 				ORDER BY game_date ASC"""
-		gm_cursor.execute(qry, (plyr_id,))
+		gm_cursor.execute(qry, (plyr_id,abbr,))
 		
 		qry_table = Table(box=None, header_style="default")
 		qry_table.add_column(name)
@@ -280,9 +280,9 @@ for team_row in team_cursor:
 		
 		qry = """SELECT game_date, opponent_abbr, home_visitor, tackles, solo, sacks, for_loss, passes_defensed, qb_hits, tds
 				FROM individual_defense
-				WHERE player_id = ?
+				WHERE player_id = ? AND team_abbr = ?
 				ORDER BY game_date ASC"""
-		gm_cursor.execute(qry, (plyr_id,))
+		gm_cursor.execute(qry, (plyr_id,abbr,))
 		
 		qry_table = Table(box=None, header_style="default")
 		qry_table.add_column(name)
@@ -307,7 +307,7 @@ for team_row in team_cursor:
 			
 			qry = """SELECT SUM(interceptions), SUM(yds)
 					FROM interceptions
-					WHERE player_id = ? and game_date = ?"""
+					WHERE player_id = ? AND game_date = ?"""
 			int_cursor.execute(qry, (plyr_id,gm_row[0],))
 			int_retn = int_cursor.fetchone()
 		
