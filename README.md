@@ -24,6 +24,7 @@ ORDER BY TotalYards DESC;
 5. Be aware though, that ESPN is changing the database over for the new week on Tuesday late afternoons, Eastern US Time. During that time, some box scores become temporarily unavailable, and will thus kick out errors. Time your database updates accordingly. The software simply overwrites previously loaded box scores, should a game's statistics be loaded twice.
 
 ### Other news:
+* The College Basketball API had significant changes to the location of player statistics for each game; these changes should be reflected as of November 4, 2025.
 * Some new fields have been added to the NFL API for this season; those have been included in the box score. Also, previews (run on a given date prior to the games) have been upgraded (abbreviated in-game box scores have been kept).
 * The CFB API is pretty much the same, and some issues, like timeouts never updating during games, still remain.
 * Some games involving FCS teams are *NOT* being updated live anymore, or have significant amounts of stats missing. Rather, ESPN is waiting for post-game reports to then load to their database. Such games seem to be available by the next day. You can use the current CFB script for FCS games by changing the two url variable assignments in the Mainline to "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=81&limit=200&dates=" and "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=81&limit=200" (group 80 is all FBS & FBS vs. FCS games, group 81 is all FCS games).
