@@ -42,9 +42,10 @@ def CBB_post_game(game_number):
 	game_status = CBB_data_json['events'][game_number]['status']['type']['detail']
 	json_tz = pytz.timezone("UTC")
 	needed_tz = pytz.timezone("US/Eastern")
-	game_date = datetime.strptime(CBB_data_json['events'][game_number]['competitions'][0]['date'], "%Y-%m-%dT%H:%MZ") 
-	game_date = json_tz.localize(game_date).astimezone(needed_tz)
-	game_date = game_date.strftime("%m-%d-%Y")
+	game_date = datetime.strptime(CBB_data_json['events'][game_number]['competitions'][0]['date'], "%Y-%m-%dT%H:%MZ") #Convert whole json date to datetime obj, but in UTC timezone, skip use on other api's
+	game_date = json_tz.localize(game_date).astimezone(needed_tz)       #Convert game_date datetime obj from UTC to US Eastern
+	game_date = game_date.strftime("%m-%d-%Y")    #Convert datetime obj to mm-dd-yyyy
+	
 	try:
 		home_short = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['shortDisplayName']
 		visitor_short = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['shortDisplayName']
@@ -81,7 +82,7 @@ def CBB_post_game(game_number):
 		headline = CBB_data_json['events'][game_number]['competitions'][0]['headlines'][0]['shortLinkText']
 	except:
 		headline = ""
-
+	
 	home_player_stats = Table(box=None, header_style="default")
 	home_player_stats.add_column(home_short)
 	home_player_stats.add_column("Pos")
@@ -105,6 +106,11 @@ def CBB_post_game(game_number):
 			except:
 				player_name = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['shortName']
 			try:
+				player_nbr = str(CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['jersey'])
+				player_name = player_name + " (" + player_nbr + ")"
+			except:
+				pass
+			try:
 				player_pos = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['position']['abbreviation']
 				if player_pos == "ATH":
 					player_pos = ""
@@ -113,17 +119,17 @@ def CBB_post_game(game_number):
 			except:
 				player_pos = ""
 			player_min = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][0]
-			player_fg = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][1]
-			player_3pt = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][2]
-			player_ft = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][3]
-			player_reb = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][6]
-			player_oreb = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][4]
-			player_ast = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][7]
-			player_stl = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][8]
-			player_blk = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][9]
-			player_to = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][10]
-			player_fl = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][11]
-			player_pts = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][12]
+			player_fg = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][9]
+			player_3pt = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][11]
+			player_ft = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][13]
+			player_reb = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][4]
+			player_oreb = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][2]
+			player_ast = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][5]
+			player_stl = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][6]
+			player_blk = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][7]
+			player_to = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][8]
+			player_fl = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][15]
+			player_pts = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][1]
 			home_player_stats.add_row(player_name, player_pos, player_min, player_fg, player_3pt, player_ft, player_reb, player_oreb, player_ast, player_to, player_stl, player_blk, player_fl, player_pts)
 		except IndexError:
 			continue
@@ -172,6 +178,11 @@ def CBB_post_game(game_number):
 			except:
 				player_name = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['shortName']
 			try:
+				player_nbr = str(CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['jersey'])
+				player_name = player_name + " (" + player_nbr + ")"
+			except:
+				pass
+			try:
 				player_pos = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['position']['abbreviation']
 				if player_pos == "ATH":
 					player_pos = ""
@@ -180,17 +191,17 @@ def CBB_post_game(game_number):
 			except:
 				player_pos = ""
 			player_min = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][0]
-			player_fg = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][1]
-			player_3pt = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][2]
-			player_ft = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][3]
-			player_reb = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][6]
-			player_oreb = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][4]
-			player_ast = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][7]
-			player_stl = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][8]
-			player_blk = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][9]
-			player_to = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][10]
-			player_fl = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][11]
-			player_pts = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][12]
+			player_fg = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][9]
+			player_3pt = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][11]
+			player_ft = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][13]
+			player_reb = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][4]
+			player_oreb = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][2]
+			player_ast = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][5]
+			player_stl = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][6]
+			player_blk = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][7]
+			player_to = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][8]
+			player_fl = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][15]
+			player_pts = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][1]
 			visitor_player_stats.add_row(player_name, player_pos, player_min, player_fg, player_3pt, player_ft, player_reb, player_oreb, player_ast, player_to, player_stl, player_blk, player_fl, player_pts)
 		except IndexError:
 			continue
@@ -349,7 +360,7 @@ def CBB_in_progress(game_number):
 	except:
 		home_rank = 99
 		visitor_rank = 99
-	try:
+	try:                                     #Not all broadcast, stops whole game if blank, watch other games, chg to no nat'l tv
 		broadcast = CBB_data_json['events'][game_number]['competitions'][0]['broadcasts'][0]['names'][0]
 	except:
 		broadcast = "No Nat'l TV"
@@ -376,7 +387,7 @@ def CBB_in_progress(game_number):
 
 	print(visitor, "("+visitor_record+visitor_rank+")  "+visitor_add_spc, visitor_score)
 	print(home, "("+home_record+home_rank+")  "+home_add_spc, home_score)
-	print(game_status+",", broadcast)
+	print(game_status+",", broadcast)                                                      #no indent line, only 1 status ok, skip arena ok
 	if notes != "":
 		print(" "+notes)
 	print(" "+visitor_short+":", str(visitor_fgm)+"/"+str(visitor_fga), visitor_fg_pct, "FG%,", str(visitor_3pt_made)+"/"+str(visitor_3pt_att), visitor_3pt_pct, "3PT%,", str(visitor_ftm)+"/"+str(visitor_fta), visitor_ft_pct, "FT%,", visitor_rebounds, "Reb,", visitor_assists, "Ast")
@@ -437,7 +448,7 @@ def CBB_pre_game(game_number):
 	except:
 		leaders_blank = ""
 
-	try:
+	try:   #Gather ranks if top 25 team; if not, rank, if available, is 99
 		home_rank = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['curatedRank']['current']
 		visitor_rank = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['curatedRank']['current']
 	except:
@@ -503,7 +514,7 @@ def CBB_pre_game(game_number):
 		print()
 
 #Mainline
-
+		
 if len(sys.argv) == 2:
 	url = "http://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?groups=50&limit=200&dates=" + str(sys.argv[1]) + "-" + str(sys.argv[1])
 elif len(sys.argv) == 3:
@@ -519,6 +530,7 @@ except:
 
 CBB_data_json = json.loads(CBB_today.read())
 
+#Iterate through each game, send to the proper def based on game state, drop out of loop once out of games; game & game_number parm is event index
 for game in range(0, 200):
 	try: 
 		game_state = CBB_data_json['events'][game]['status']['type']['state']
