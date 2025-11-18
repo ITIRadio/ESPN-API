@@ -99,12 +99,16 @@ def CBB_post_game(game_number):
 	home_player_stats.add_column("Fls", justify="right")
 	home_player_stats.add_column("Pts", justify="right")
 	
+	home_rebounds = 0
+	home_off_reb = 0
+	
 	for player in range(0, 25):
 		try:
 			try:
 				player_name = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['displayName']
 			except:
 				player_name = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['shortName']
+			player_name_short = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['shortName']
 			try:
 				player_nbr = str(CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['jersey'])
 				player_name = player_name + " (" + player_nbr + ")"
@@ -118,25 +122,29 @@ def CBB_post_game(game_number):
 					player_pos = player_pos + "*"
 			except:
 				player_pos = ""
-			player_min = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][0]
-			player_fg = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][9]
-			player_3pt = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][11]
-			player_ft = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][13]
+			player_min = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][12]
+			player_fg = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][1]
+			player_3pt = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][2]
+			player_ft = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][3]
 			player_reb = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][4]
-			player_oreb = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][2]
+			player_oreb = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][9]
 			player_ast = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][5]
-			player_stl = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][6]
-			player_blk = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][7]
-			player_to = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][8]
-			player_fl = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][15]
-			player_pts = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][1]
+			player_stl = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][7]
+			player_blk = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][8]
+			player_to = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][6]
+			player_fl = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][11]
+			player_pts = CBB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][0]
+			home_rebounds += int(player_reb)
+			home_off_reb += int(player_oreb)
 			home_player_stats.add_row(player_name, player_pos, player_min, player_fg, player_3pt, player_ft, player_reb, player_oreb, player_ast, player_to, player_stl, player_blk, player_fl, player_pts)
+
 		except IndexError:
 			continue
 	
 	home_score = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['score']
-	home_rebounds = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue']
-	home_off_reb = CBB_event_data_json['boxscore']['teams'][1]['statistics'][7]['displayValue']
+	home_ttl_rebounds = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue']
+#	home_off_reb = CBB_event_data_json['boxscore']['teams'][1]['statistics'][7]['displayValue']  Not using this, using own ttl, w/o tm rebs
+	home_team_rebs = int(home_ttl_rebounds) - home_rebounds
 	home_assists = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][2]['displayValue']
 	home_fg_pct = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][5]['displayValue']
 	home_ft_pct = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][6]['displayValue']
@@ -152,7 +160,8 @@ def CBB_post_game(game_number):
 	home_blk = CBB_event_data_json['boxscore']['teams'][1]['statistics'][11]['displayValue']
 	home_fls = CBB_event_data_json['boxscore']['teams'][1]['statistics'][21]['displayValue']
 	
-	home_player_stats.add_row("Totals", "", "", home_fgm + "-" + home_fga, home_3pt_made + "-" + home_3pt_att, home_ftm + "-" + home_fta, home_rebounds, home_off_reb, home_assists, home_to, home_stl, home_blk, home_fls, home_score)
+	home_player_stats.add_row("Team Rebounds", "", "", "", "", "", str(home_team_rebs), "", "", "", "", "", "", "", "")
+	home_player_stats.add_row("Totals", "", "", home_fgm + "-" + home_fga, home_3pt_made + "-" + home_3pt_att, home_ftm + "-" + home_fta, home_ttl_rebounds, str(home_off_reb), home_assists, home_to, home_stl, home_blk, home_fls, home_score)
 	home_player_stats.add_row("", "", "", home_fg_pct + "%", home_3pt_pct + "%", home_ft_pct + "%", "", "", "", "", "", "", "", "")
 
 	visitor_player_stats = Table(box=None, header_style="default")
@@ -171,12 +180,16 @@ def CBB_post_game(game_number):
 	visitor_player_stats.add_column("Fls", justify="right")
 	visitor_player_stats.add_column("Pts", justify="right")
 	
+	visitor_rebounds = 0
+	visitor_off_reb = 0
+	
 	for player in range(0, 25):
 		try:
 			try:
 				player_name = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['displayName']
 			except:
 				player_name = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['shortName']
+			player_name_short = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['shortName']
 			try:
 				player_nbr = str(CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['jersey'])
 				player_name = player_name + " (" + player_nbr + ")"
@@ -190,25 +203,28 @@ def CBB_post_game(game_number):
 					player_pos = player_pos + "*"
 			except:
 				player_pos = ""
-			player_min = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][0]
-			player_fg = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][9]
-			player_3pt = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][11]
-			player_ft = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][13]
+			player_min = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][12]
+			player_fg = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][1]
+			player_3pt = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][2]
+			player_ft = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][3]
 			player_reb = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][4]
-			player_oreb = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][2]
+			player_oreb = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][9]
 			player_ast = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][5]
-			player_stl = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][6]
-			player_blk = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][7]
-			player_to = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][8]
-			player_fl = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][15]
-			player_pts = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][1]
+			player_stl = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][7]
+			player_blk = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][8]
+			player_to = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][6]
+			player_fl = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][11]
+			player_pts = CBB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][0]
+			visitor_rebounds += int(player_reb)
+			visitor_off_reb += int(player_oreb)
 			visitor_player_stats.add_row(player_name, player_pos, player_min, player_fg, player_3pt, player_ft, player_reb, player_oreb, player_ast, player_to, player_stl, player_blk, player_fl, player_pts)
 		except IndexError:
 			continue
 	
 	visitor_score = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['score']
-	visitor_rebounds = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][0]['displayValue']
-	visitor_off_reb = CBB_event_data_json['boxscore']['teams'][0]['statistics'][7]['displayValue']
+	visitor_ttl_rebounds = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][0]['displayValue']
+#	visitor_off_reb = CBB_event_data_json['boxscore']['teams'][0]['statistics'][7]['displayValue']
+	visitor_team_rebs = int(visitor_ttl_rebounds) - visitor_rebounds
 	visitor_assists = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][2]['displayValue']
 	visitor_fg_pct = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][5]['displayValue']
 	visitor_ft_pct = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][6]['displayValue']
@@ -224,7 +240,8 @@ def CBB_post_game(game_number):
 	visitor_blk = CBB_event_data_json['boxscore']['teams'][0]['statistics'][11]['displayValue']
 	visitor_fls = CBB_event_data_json['boxscore']['teams'][0]['statistics'][21]['displayValue']
 	
-	visitor_player_stats.add_row("Totals", "", "", visitor_fgm + "-" + visitor_fga, visitor_3pt_made + "-" + visitor_3pt_att, visitor_ftm + "-" + visitor_fta, visitor_rebounds, visitor_off_reb, visitor_assists, visitor_to, visitor_stl, visitor_blk, visitor_fls, visitor_score)
+	visitor_player_stats.add_row("Team Rebounds", "", "", "", "", "", str(visitor_team_rebs), "", "", "", "", "", "", "", "")
+	visitor_player_stats.add_row("Totals", "", "", visitor_fgm + "-" + visitor_fga, visitor_3pt_made + "-" + visitor_3pt_att, visitor_ftm + "-" + visitor_fta, visitor_ttl_rebounds, str(visitor_off_reb), visitor_assists, visitor_to, visitor_stl, visitor_blk, visitor_fls, visitor_score)
 	visitor_player_stats.add_row("", "", "", visitor_fg_pct + "%", visitor_3pt_pct + "%", visitor_ft_pct + "%", "", "", "", "", "", "", "", "")
 	
 	team_comparison = Table(box=None, header_style="default")
