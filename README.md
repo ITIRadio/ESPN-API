@@ -1,4 +1,6 @@
 # ESPN-API
+### College Basketball Update: ESPN is changing the API on a weekly basis. Just as I publish a commit here, the API gets changed. For the time being, I am having to withdraw this utility until the API stabilizes. Hopefully, I'll be able to post a somewhat-permanent commit before the NCAA Tournament.
+
 ### *Updates: NFL & CFB now updated for 2025 season, plus new utilities for maintaining a NFL SQLite database throughout the season.*
 
 Miscellaneous Python Linux command line utilities to access the ESPN API. Primarily designed for post-game box scores, but they can be used for game preview data as available, and in-game partial box scores.
