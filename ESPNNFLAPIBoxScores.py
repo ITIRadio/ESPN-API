@@ -687,8 +687,8 @@ def NFL_pre_game(game_number):
 		team_stats.add_row("Yards Rushing Per Game",  NFL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue'])
 		team_stats.add_row("Points Allowed Per Game",  NFL_event_data_json['boxscore']['teams'][0]['statistics'][4]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][4]['displayValue'])
 		team_stats.add_row("Total Allowed Yards Per Game",  NFL_event_data_json['boxscore']['teams'][0]['statistics'][5]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][5]['displayValue'])
-		team_stats.add_row("Yards Allowed Per Game",  NFL_event_data_json['boxscore']['teams'][0]['statistics'][6]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][6]['displayValue'])
-		team_stats.add_row("Yards Allowed Per Game",  NFL_event_data_json['boxscore']['teams'][0]['statistics'][7]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][7]['displayValue'])
+		team_stats.add_row("Yards Passing Allowed Per Game",  NFL_event_data_json['boxscore']['teams'][0]['statistics'][6]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][6]['displayValue'])
+		team_stats.add_row("Yards Rushing Allowed Per Game",  NFL_event_data_json['boxscore']['teams'][0]['statistics'][7]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][7]['displayValue'])
 	except:
 		team_stats = ""
 		
@@ -812,4 +812,5 @@ for game in range(0, 20):
 		else:
 			NFL_pre_game(game)
 	except IndexError:
+
 		continue
