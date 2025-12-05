@@ -32,18 +32,18 @@ for team_row in team_cursor:
 	qry = "SELECT COUNT(*) FROM team_totals WHERE team_abbr = ? and win_loss = 'W'"    #Single quote for "W" within qry string
 	qry_cursor.execute(qry, (abbr,))
 	qry_row = qry_cursor.fetchone()
-	wins = str(qry_row[0])
+	wins = qry_row[0]
 	qry = "SELECT COUNT(*) FROM team_totals WHERE team_abbr = ? and win_loss = 'L'"
 	qry_cursor.execute(qry, (abbr,))
 	qry_row = qry_cursor.fetchone()
-	losses = str(qry_row[0])
+	losses = qry_row[0]
 	qry = "SELECT COUNT(*) FROM team_totals WHERE team_abbr = ? and win_loss = 'T'"
 	qry_cursor.execute(qry, (abbr,))
 	qry_row = qry_cursor.fetchone()
-	ties = str(qry_row[0])
-	num_gms = int(wins) + int(losses) + int(ties)
+	ties = qry_row[0]
+	num_gms = wins + losses + ties
 	
-	print(wins + " Wins, " + losses + " Losses, " + ties + " Ties")
+	print(str(wins) + " Wins, " + str(losses) + " Losses, " + str(ties) + " Ties")
 	print()
 	
 	qry_table = Table(box=None, header_style="default")
@@ -59,6 +59,7 @@ for team_row in team_cursor:
 		WHERE team_abbr = ?
 		ORDER BY game_date"""
 	qry_cursor.execute(qry, (abbr,))
+	pts_for = pts_vs = 0
 	
 	for qry_row in qry_cursor:
 		game_date_string = qry_row[0]
@@ -66,7 +67,12 @@ for team_row in team_cursor:
 		game_date = game_date_dt.strftime("%B") + " " + game_date_dt.strftime("%-d")
 		home_road = "Vs" if qry_row[2] == "H" else "@"
 		qry_table.add_row(game_date, home_road, qry_row[1], qry_row[3], str(qry_row[4]), str(qry_row[5]))
-		
+		pts_for += qry_row[4]; pts_vs += qry_row[5]
+	
+	avg_pts_for = pts_for / num_gms
+	avg_pts_vs = pts_vs / num_gms
+	qry_table.add_row("Totals", "", "", "", str(pts_for), str(pts_vs))
+	qry_table.add_row("Per Game", "", "", "", f"{avg_pts_for:.1f}", f"{avg_pts_vs:.1f}")
 	console.print(qry_table)
 	print()
 	
@@ -153,13 +159,13 @@ for team_row in team_cursor:
 	qry_table.add_row("  Completion Percent", f"{off_result:2.1%}", "", f"{def_result:2.1%}", "")
 	off_result = off_totals[5] / num_gms
 	def_result = def_totals[5] / num_gms
-	qry_table.add_row("Passing Yards", str(off_totals[5]), f"{off_result:.1f}", str(def_totals[5]), f"{def_result:.1f}")
+	qry_table.add_row("Net Passing Yds (Minus Sack Yds)", str(off_totals[5]), f"{off_result:.1f}", str(def_totals[5]), f"{def_result:.1f}")
 	off_result = off_totals[5] / off_totals[3]
 	def_result = def_totals[5] / def_totals[3]
-	qry_table.add_row("  Yards Per Completion", f"{off_result:.1f}", "", f"{def_result:.1f}", "")
+	qry_table.add_row("  Net Yards Per Completion", f"{off_result:.1f}", "", f"{def_result:.1f}", "")
 	off_result = off_totals[5] / off_totals[4]
 	def_result = def_totals[5] / def_totals[4]
-	qry_table.add_row("  Yards Per Attempt", f"{off_result:.1f}", "", f"{def_result:.1f}", "")
+	qry_table.add_row("  Net Yards Per Attempt", f"{off_result:.1f}", "", f"{def_result:.1f}", "")
 	off_result = off_totals[6] / num_gms
 	def_result = def_totals[6] / num_gms
 	qry_table.add_row("Total Yards", str(off_totals[6]), f"{off_result:.1f}", str(def_totals[6]), f"{def_result:.1f}")
@@ -178,7 +184,7 @@ for team_row in team_cursor:
 	qry_table.add_row("")
 	off_result = off_totals[9] / num_gms
 	def_result = def_totals[9] / num_gms
-	qry_table.add_row("Sacked", str(int(off_totals[9])), f"{off_result:.1f}", str(int(def_totals[9])), f"{def_result:.1f}")
+	qry_table.add_row("Sacked", str(off_totals[9]), f"{off_result:.1f}", str(def_totals[9]), f"{def_result:.1f}")
 	off_result = off_totals[10] / num_gms
 	def_result = def_totals[10] / num_gms
 	qry_table.add_row("Sacked Yards", str(off_totals[10]), f"{off_result:.1f}", str(def_totals[10]), f"{def_result:.1f}")
@@ -258,13 +264,18 @@ for team_row in team_cursor:
 			GROUP BY player_id
 			ORDER BY yds DESC, ttl_comp DESC"""
 	qry_cursor.execute(qry, (abbr,))
+	comp = att = yds = td = int = t300 = 0
 	
 	for qry_row in qry_cursor:
 		if qry_row[2] > 0:                                 # ESPN has QB's having a passing entry in games where 1 appears just to hand off
 			comp_pct = qry_row[1] / qry_row[2]
 			yds_per_gm = qry_row[3] / qry_row[6]
 			qry_table.add_row(qry_row[0], str(qry_row[6]), str(qry_row[1]), str(qry_row[2]), f"{comp_pct:2.1%}", str(qry_row[3]), f"{yds_per_gm:.1f}", str(qry_row[4]), str(qry_row[5]), str(qry_row[7]))
+			comp += qry_row[1]; att += qry_row[2]; yds += qry_row[3]; td += qry_row[4]; int += qry_row[5]; t300 += qry_row[7]
 	
+	ttl_comp_pct = comp / att
+	ttl_yds_per_gm = yds / num_gms
+	qry_table.add_row("Totals", "", str(comp), str(att), f"{ttl_comp_pct:2.1%}", str(yds), f"{ttl_yds_per_gm:.1f}", str(td), str(int), str(t300))
 	console.print(qry_table)
 	print()
 
@@ -287,13 +298,19 @@ for team_row in team_cursor:
 			GROUP BY player_id
 			ORDER BY yds DESC, ttl_rush DESC"""
 	qry_cursor.execute(qry, (abbr,))
+	rush = yds = td = h100 = long = 0
 	
 	for qry_row in qry_cursor:
 		if qry_row[1] > 0:
 			yds_per_gm = qry_row[2] / qry_row[5]
 			yds_per_rush = qry_row[2] / qry_row[1]
 			qry_table.add_row(qry_row[0], str(qry_row[5]), str(qry_row[1]), str(qry_row[2]), f"{yds_per_rush:.1f}", f"{yds_per_gm:.1f}", str(qry_row[3]), str(qry_row[4]), str(qry_row[6]))
+			rush += qry_row[1]; yds += qry_row[2]; td += qry_row[3]; h100 += qry_row[6]
+			long = qry_row[4] if qry_row[4] > long else long
 	
+	ttl_yds_per_rush = yds / rush
+	ttl_yds_per_game = yds / num_gms	
+	qry_table.add_row("Totals", "", str(rush), str(yds), f"{ttl_yds_per_rush:.1f}", f"{ttl_yds_per_game:.1f}", str(td), str(long), str(h100))
 	console.print(qry_table)
 	print()
 	
@@ -317,6 +334,7 @@ for team_row in team_cursor:
 			GROUP BY player_id
 			ORDER BY yds DESC, ttl_recept DESC"""
 	qry_cursor.execute(qry, (abbr,))
+	rec = yds = td = h100 = long = tgt = 0
 	
 	for qry_row in qry_cursor:
 		if qry_row[1] > 0:
@@ -326,7 +344,12 @@ for team_row in team_cursor:
 			else:
 				yds_per_rec = 0
 			qry_table.add_row(qry_row[0], str(qry_row[6]), str(qry_row[1]), str(qry_row[2]), f"{yds_per_rec:.1f}", f"{yds_per_gm:.1f}", str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[7]))
+			rec += qry_row[1]; yds += qry_row[2]; td += qry_row[3]; tgt += qry_row[5]; h100 += qry_row[7]
+			long = qry_row[4] if qry_row[4] > long else long
 	
+	ttl_yds_per_rec = yds / rec
+	ttl_yds_per_game = yds / num_gms	
+	qry_table.add_row("Totals", "", str(rec), str(yds), f"{ttl_yds_per_rec:.1f}", f"{ttl_yds_per_game:.1f}", str(td), str(long), str(tgt), str(h100))
 	console.print(qry_table)
 	print()
 
@@ -344,15 +367,17 @@ for team_row in team_cursor:
 			ORDER BY ttl_fumb_lost DESC, ttl_fumb DESC"""
 	qry_cursor.execute(qry, (abbr,))
 	
-	num_fumb = 0
+	num_fumb = fumb_lost = 0
 	for qry_row in qry_cursor:
 		if qry_row[1] > 0:
-			num_fumb = num_fumb + 1
+			num_fumb += qry_row[1]
+			fumb_lost += qry_row[2]
 			qry_table.add_row(qry_row[0], str(qry_row[1]), str(qry_row[2]))
 
 	if num_fumb == 0:
 		print(" No Fumbles")
 	else:
+		qry_table.add_row("Totals", str(num_fumb), str(fumb_lost))
 		console.print(qry_table)
 	print()
 	
@@ -374,12 +399,18 @@ for team_row in team_cursor:
 			GROUP BY player_id
 			ORDER BY fgm DESC, fga DESC"""
 	qry_cursor.execute(qry, (abbr,))
+	fgm = fga = long = xpm = xpa = 0
 	
 	for qry_row in qry_cursor:
+		fgm += qry_row[1]; fga += qry_row[2]; xpm += qry_row[4]; xpa += qry_row[5]
+		long = qry_row[3] if qry_row[3] > long else long
 		fg_pct = qry_row[1] / qry_row[2] if qry_row[2] > 0 else 0
 		xp_pct = qry_row[4] / qry_row[5] if qry_row[5] > 0 else 0
 		qry_table.add_row(qry_row[0], str(qry_row[1]), str(qry_row[2]), f"{fg_pct:2.1%}", str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), f"{xp_pct:2.1%}")
 	
+	ttl_fg_pct = fgm / fga
+	ttl_xp_pct = xpm / xpa
+	qry_table.add_row("Totals", str(fgm), str(fga), f"{ttl_fg_pct:2.1%}", str(long), str(xpm), str(xpa), f"{ttl_xp_pct:2.1%}")
 	console.print(qry_table)
 	print()
 	
@@ -400,11 +431,16 @@ for team_row in team_cursor:
 			GROUP BY player_id
 			ORDER BY punt_yds DESC, ttl_punts DESC"""
 	qry_cursor.execute(qry, (abbr,))
+	punt = yds = long = tchbk = ins20 = 0
 	
 	for qry_row in qry_cursor:
+		punt += qry_row[1]; yds += qry_row[2]; tchbk += qry_row[4]; ins20 += qry_row[5]
+		long = qry_row[3] if qry_row[3] > long else long
 		yds_per_punt = qry_row[2] / qry_row[1] if qry_row[1] > 0 else 0
 		qry_table.add_row(qry_row[0], str(qry_row[1]), str(qry_row[2]), f"{yds_per_punt:.1f}", str(qry_row[3]), str(qry_row[4]), str(qry_row[5]))
 	
+	ttl_yds_per_punt = yds / punt
+	qry_table.add_row("Totals", str(punt), str(yds), f"{ttl_yds_per_punt:.1f}", str(long), str(tchbk), str(ins20))
 	console.print(qry_table)
 	print()
 	
@@ -425,15 +461,20 @@ for team_row in team_cursor:
 			ORDER BY retn_yds DESC, ttl_retns DESC"""
 	qry_cursor.execute(qry, (abbr,))
 	
-	num_retn = 0
+	num_retn = yds = td = long = 0
 	for qry_row in qry_cursor:
-		num_retn = num_retn + 1
+		num_retn += qry_row[1]
+		yds += qry_row[2]
+		td += qry_row[4]
+		long = qry_row[3] if qry_row[3] > long else long
 		yds_per_retn = qry_row[2] / qry_row[1]
 		qry_table.add_row(qry_row[0], str(qry_row[1]), str(qry_row[2]), f"{yds_per_retn:.1f}", str(qry_row[3]), str(qry_row[4]))
 	
 	if num_retn == 0:
 		print(" No Punt Returns")
 	else:
+		yds_per_retn = yds / num_retn
+		qry_table.add_row("Totals", str(num_retn), str(yds), f"{yds_per_retn:.1f}", str(long), str(td))
 		console.print(qry_table)
 	print()
 	
@@ -454,15 +495,20 @@ for team_row in team_cursor:
 			ORDER BY retn_yds DESC, ttl_retns DESC"""
 	qry_cursor.execute(qry, (abbr,))
 	
-	num_retn = 0
+	num_retn = yds = td = long = 0
 	for qry_row in qry_cursor:
-		num_retn = num_retn + 1
+		num_retn += qry_row[1]
+		yds += qry_row[2]
+		td += qry_row[4]
+		long = qry_row[3] if qry_row[3] > long else long
 		yds_per_retn = qry_row[2] / qry_row[1]
 		qry_table.add_row(qry_row[0], str(qry_row[1]), str(qry_row[2]), f"{yds_per_retn:.1f}", str(qry_row[3]), str(qry_row[4]))
 	
 	if num_retn == 0:
 		print(" No Kickoff Returns")
 	else:
+		yds_per_retn = yds / num_retn
+		qry_table.add_row("Totals", str(num_retn), str(yds), f"{yds_per_retn:.1f}", str(long), str(td))
 		console.print(qry_table)
 	print()
 	
@@ -485,10 +531,13 @@ for team_row in team_cursor:
 			GROUP BY player_id
 			ORDER BY tkls DESC, lone DESC, sack DESC"""
 	qry_cursor.execute(qry, (abbr,))
+	tkl = solo = sks = tfl = pd = hit = td = 0
 	
 	for qry_row in qry_cursor:
 		qry_table.add_row(qry_row[0], str(qry_row[8]), str(qry_row[1]), str(qry_row[2]), str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[6]), str(qry_row[7]))
+		tkl += qry_row[1]; solo += qry_row[2]; sks += qry_row[3]; tfl += qry_row[4]; pd += qry_row[5]; hit += qry_row[6]; td += qry_row[7]
 	
+	qry_table.add_row("Totals", "", str(tkl), str(solo), str(sks), str(tfl), str(pd), str(hit), str(td))
 	console.print(qry_table)
 	print()
 	
@@ -507,14 +556,17 @@ for team_row in team_cursor:
 			ORDER BY int DESC, int_yds DESC"""
 	qry_cursor.execute(qry, (abbr,))
 	
-	num_int = 0
+	num_int = yds = td = 0
 	for qry_row in qry_cursor:
-		num_int = num_int + 1
+		num_int += qry_row[1]
+		yds += qry_row[2]
+		td += qry_row[3]
 		qry_table.add_row(qry_row[0], str(qry_row[1]), str(qry_row[2]), str(qry_row[3]))
 	
 	if num_int == 0:
 		print(" No Interceptions")
 	else:
+		qry_table.add_row("Totals", str(num_int), str(yds), str(td))
 		console.print(qry_table)	
 	print("--------------------------------------------------")
 	print("\f")
@@ -628,7 +680,7 @@ print("\f")
 
 qry_table = Table(box=None, header_style="default")
 qry_table.add_column("", justify="right")
-qry_table.add_column("Defensive Leaders")
+qry_table.add_column("Defensive Leaders by Tackles")
 qry_table.add_column("")
 qry_table.add_column("Gms", justify="right")
 qry_table.add_column("Tkls", justify="right")
@@ -643,6 +695,34 @@ qry = """SELECT display_name, SUM(tackles) as tkls, SUM(solo) as lone, SUM(sacks
 		FROM individual_defense
 		GROUP BY player_id
 		ORDER BY tkls DESC, sack DESC"""
+qry_cursor.execute(qry)
+	
+for top_40 in range(1, 41):
+	qry_row = qry_cursor.fetchone()
+	qry_table.add_row(str(top_40), qry_row[0], qry_row[9], str(qry_row[8]), str(qry_row[1]), str(qry_row[2]), str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[6]), str(qry_row[7]))
+	
+console.print(qry_table)
+print()
+
+# Defense Leaders by Sack
+
+qry_table = Table(box=None, header_style="default")
+qry_table.add_column("", justify="right")
+qry_table.add_column("Defensive Leaders by Sack")
+qry_table.add_column("")
+qry_table.add_column("Gms", justify="right")
+qry_table.add_column("Tkls", justify="right")
+qry_table.add_column("Solos", justify="right")
+qry_table.add_column("Sacks", justify="right")
+qry_table.add_column("TFL", justify="right")
+qry_table.add_column("PD", justify="right")
+qry_table.add_column("QB Hit", justify="right")
+qry_table.add_column("TD", justify="right")
+	
+qry = """SELECT display_name, SUM(tackles) as tkls, SUM(solo) as lone, SUM(sacks) AS sack, SUM(for_loss), SUM(passes_defensed), SUM(qb_hits), SUM(tds), COUNT(*) as gms, team_abbr
+		FROM individual_defense
+		GROUP BY player_id
+		ORDER BY sack DESC, tkls DESC"""
 qry_cursor.execute(qry)
 	
 for top_40 in range(1, 41):
