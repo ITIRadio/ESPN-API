@@ -408,8 +408,8 @@ for team_row in team_cursor:
 		xp_pct = qry_row[4] / qry_row[5] if qry_row[5] > 0 else 0
 		qry_table.add_row(qry_row[0], str(qry_row[1]), str(qry_row[2]), f"{fg_pct:2.1%}", str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), f"{xp_pct:2.1%}")
 	
-	ttl_fg_pct = fgm / fga
-	ttl_xp_pct = xpm / xpa
+	ttl_fg_pct = fgm / fga if fga > 0 else 0
+	ttl_xp_pct = xpm / xpa if xpa > 0 else 0
 	qry_table.add_row("Totals", str(fgm), str(fga), f"{ttl_fg_pct:2.1%}", str(long), str(xpm), str(xpa), f"{ttl_xp_pct:2.1%}")
 	console.print(qry_table)
 	print()
@@ -439,9 +439,12 @@ for team_row in team_cursor:
 		yds_per_punt = qry_row[2] / qry_row[1] if qry_row[1] > 0 else 0
 		qry_table.add_row(qry_row[0], str(qry_row[1]), str(qry_row[2]), f"{yds_per_punt:.1f}", str(qry_row[3]), str(qry_row[4]), str(qry_row[5]))
 	
-	ttl_yds_per_punt = yds / punt
-	qry_table.add_row("Totals", str(punt), str(yds), f"{ttl_yds_per_punt:.1f}", str(long), str(tchbk), str(ins20))
-	console.print(qry_table)
+	if punt == 0:
+		print(" No Punts")
+	else:
+		ttl_yds_per_punt = yds / punt
+		qry_table.add_row("Totals", str(punt), str(yds), f"{ttl_yds_per_punt:.1f}", str(long), str(tchbk), str(ins20))
+		console.print(qry_table)
 	print()
 	
 # Punt Returns
@@ -599,9 +602,10 @@ qry_cursor.execute(qry)
 
 for top_40 in range(1, 41):               #Python always has to go one past
 	qry_row = qry_cursor.fetchone()
-	yds_per_gm = qry_row[3] / qry_row[6]
-	comp_pct = qry_row[1] / qry_row[2]
-	qry_table.add_row(str(top_40), qry_row[0], qry_row[7], str(qry_row[6]), str(qry_row[1]), str(qry_row[2]), f"{comp_pct:2.1%}", str(qry_row[3]), f"{yds_per_gm:.1f}", str(qry_row[4]), str(qry_row[5]))
+	if qry_row != None:
+		yds_per_gm = qry_row[3] / qry_row[6]
+		comp_pct = qry_row[1] / qry_row[2]
+		qry_table.add_row(str(top_40), qry_row[0], qry_row[7], str(qry_row[6]), str(qry_row[1]), str(qry_row[2]), f"{comp_pct:2.1%}", str(qry_row[3]), f"{yds_per_gm:.1f}", str(qry_row[4]), str(qry_row[5]))
 	
 console.print(qry_table)
 print("\f")
@@ -634,9 +638,10 @@ qry_cursor.execute(qry)
 
 for top_40 in range(1, 41):
 	qry_row = qry_cursor.fetchone()
-	yds_per_gm = qry_row[3] / qry_row[6]
-	yds_per_rush = qry_row[3] / qry_row[2]
-	qry_table.add_row(str(top_40), qry_row[0], qry_row[1], str(qry_row[6]), str(qry_row[2]), str(qry_row[3]), f"{yds_per_rush:.1f}", f"{yds_per_gm:.1f}", str(qry_row[4]), str(qry_row[5]))
+	if qry_row != None:
+		yds_per_gm = qry_row[3] / qry_row[6]
+		yds_per_rush = qry_row[3] / qry_row[2]
+		qry_table.add_row(str(top_40), qry_row[0], qry_row[1], str(qry_row[6]), str(qry_row[2]), str(qry_row[3]), f"{yds_per_rush:.1f}", f"{yds_per_gm:.1f}", str(qry_row[4]), str(qry_row[5]))
 	
 console.print(qry_table)
 print("\f")
@@ -669,9 +674,11 @@ qry_cursor.execute(qry)
 
 for top_60 in range(1, 61):               #Python always has to go one past
 	qry_row = qry_cursor.fetchone()
-	yds_per_gm = qry_row[3] / qry_row[6]
-	yds_per_recept = qry_row[3] / qry_row[2]
-	qry_table.add_row(str(top_60), qry_row[0], qry_row[1], str(qry_row[6]), str(qry_row[2]), str(qry_row[3]), f"{yds_per_recept:.1f}", f"{yds_per_gm:.1f}", str(qry_row[4]), str(qry_row[5]))
+	if qry_row != None:
+		if qry_row[2] > 0:
+			yds_per_gm = qry_row[3] / qry_row[6]
+			yds_per_recept = qry_row[3] / qry_row[2]
+			qry_table.add_row(str(top_60), qry_row[0], qry_row[1], str(qry_row[6]), str(qry_row[2]), str(qry_row[3]), f"{yds_per_recept:.1f}", f"{yds_per_gm:.1f}", str(qry_row[4]), str(qry_row[5]))
 	
 console.print(qry_table)
 print("\f")
@@ -699,7 +706,8 @@ qry_cursor.execute(qry)
 	
 for top_40 in range(1, 41):
 	qry_row = qry_cursor.fetchone()
-	qry_table.add_row(str(top_40), qry_row[0], qry_row[9], str(qry_row[8]), str(qry_row[1]), str(qry_row[2]), str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[6]), str(qry_row[7]))
+	if qry_row != None:
+		qry_table.add_row(str(top_40), qry_row[0], qry_row[9], str(qry_row[8]), str(qry_row[1]), str(qry_row[2]), str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[6]), str(qry_row[7]))
 	
 console.print(qry_table)
 print()
@@ -727,7 +735,8 @@ qry_cursor.execute(qry)
 	
 for top_40 in range(1, 41):
 	qry_row = qry_cursor.fetchone()
-	qry_table.add_row(str(top_40), qry_row[0], qry_row[9], str(qry_row[8]), str(qry_row[1]), str(qry_row[2]), str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[6]), str(qry_row[7]))
+	if qry_row != None:
+		qry_table.add_row(str(top_40), qry_row[0], qry_row[9], str(qry_row[8]), str(qry_row[1]), str(qry_row[2]), str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[6]), str(qry_row[7]))
 	
 console.print(qry_table)
 print()
@@ -750,7 +759,8 @@ qry_cursor.execute(qry)
 	
 for top_10 in range(1, 11):
 	qry_row = qry_cursor.fetchone()
-	qry_table.add_row(str(top_10), qry_row[0], qry_row[1], str(qry_row[2]), str(qry_row[3]), str(qry_row[4]))
+	if qry_row != None:
+		qry_table.add_row(str(top_10), qry_row[0], qry_row[1], str(qry_row[2]), str(qry_row[3]), str(qry_row[4]))
 	
 console.print(qry_table)
 
