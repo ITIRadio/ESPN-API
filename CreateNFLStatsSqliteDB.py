@@ -182,6 +182,7 @@ try:
 	create_table = '''
 	CREATE TABLE IF NOT EXISTS team_totals (
 		team_abbr TEXT NOT NULL,
+		full_name TEXT NOT NULL,
 		game_date TEXT NOT NULL,
 		opponent_abbr TEXT NOT NULL,
 		home_visitor TEXT NOT NULL,
@@ -224,4 +225,5 @@ except sqlite3.Error as err:
 finally:
 	if db_conn:
 		db_conn.close()
+
 
