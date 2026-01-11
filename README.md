@@ -1,4 +1,5 @@
 # ESPN-API
+### The final regular season NFL statistics SQLite database for '25-'26 has now been included in the repository.
 ### College Basketball Update: ESPN is changing the API on a weekly basis. Just as I publish a commit here, the API gets changed. For the time being, I am having to withdraw this utility until the API stabilizes. Hopefully, I'll be able to post a somewhat-permanent commit before the NCAA Tournament.
 
 ### *Updates: NFL & CFB now updated for 2025 season, plus new utilities for maintaining a NFL SQLite database throughout the season.*
