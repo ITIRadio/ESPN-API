@@ -160,7 +160,7 @@ for team_row in team_cursor:
 				ttl_recept += gm_row[3]; ttl_yds += gm_row[4]; ttl_td += gm_row[5]; long = gm_row[6] if gm_row[6] > long else long; ttl_tgt += gm_row[7]
 
 			yds_per_recept = ttl_yds / ttl_recept if ttl_recept >  0 else 0
-			qry_table.add_row("Totals", "", "", str(ttl_rush), str(ttl_yds), f"{yds_per_recept:.1f}", str(ttl_td), str(long), str(ttl_tgt))
+			qry_table.add_row("Totals", "", "", str(ttl_recept), str(ttl_yds), f"{yds_per_recept:.1f}", str(ttl_td), str(long), str(ttl_tgt))
 			console.print(qry_table)
 			print()
 
@@ -196,7 +196,7 @@ for team_row in team_cursor:
 		qry_table.add_column("Long", justify="right")
 		qry_table.add_column("Tgt", justify="right")
 		
-		tl_recept = ttl_yds = ttl_td = long = ttl_tgt = 0
+		ttl_recept = ttl_yds = ttl_td = long = ttl_tgt = 0
 	
 		for gm_row in gm_cursor:
 			game_date_dt = datetime.strptime(gm_row[0], "%Y%m%d")
@@ -207,7 +207,7 @@ for team_row in team_cursor:
 			ttl_recept += gm_row[3]; ttl_yds += gm_row[4]; ttl_td += gm_row[5]; long = gm_row[6] if gm_row[6] > long else long; ttl_tgt += gm_row[7]
 		
 		yds_per_recept = ttl_yds / ttl_recept if ttl_recept >  0 else 0
-		qry_table.add_row("Totals", "", "", str(ttl_rush), str(ttl_yds), f"{yds_per_recept:.1f}", str(ttl_td), str(long), str(ttl_tgt))
+		qry_table.add_row("Totals", "", "", str(ttl_recept), str(ttl_yds), f"{yds_per_recept:.1f}", str(ttl_td), str(long), str(ttl_tgt))
 		console.print(qry_table)
 		print()
 
