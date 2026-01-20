@@ -188,8 +188,8 @@ for team_row in team_cursor:
 	off_result = off_totals[10] / num_gms
 	def_result = def_totals[10] / num_gms
 	qry_table.add_row("Sacked Yards", str(off_totals[10]), f"{off_result:.1f}", str(def_totals[10]), f"{def_result:.1f}")
-	off_result = off_totals[10] / off_totals[9]
-	def_result = def_totals[10] / def_totals[9]
+	off_result = off_totals[10] / off_totals[9] if off_totals[9] > 0 else 0
+	def_result = def_totals[10] / def_totals[9] if def_totals[9] > 0 else 0
 	qry_table.add_row("  Yards Per Sack", f"{off_result:.1f}", "", f"{def_result:.1f}", "")
 	qry_table.add_row("")
 	off_result = off_totals[11] / num_gms
@@ -198,8 +198,8 @@ for team_row in team_cursor:
 	off_result = off_totals[12] / num_gms
 	def_result = def_totals[12] / num_gms
 	qry_table.add_row("Third Down Conversions Attempted", str(off_totals[12]), f"{off_result:.1f}", str(def_totals[12]), f"{def_result:.1f}")
-	off_result = off_totals[11] / off_totals[12]
-	def_result = def_totals[11] / def_totals[12]
+	off_result = off_totals[11] / off_totals[12] if off_totals[12] > 0 else 0
+	def_result = def_totals[11] / def_totals[12] if def_totals[12] > 0 else 0
 	qry_table.add_row("  Third Down Conv. Percent", f"{off_result:2.1%}", "", f"{def_result:2.1%}", "")
 	off_result = off_totals[13] / num_gms
 	def_result = def_totals[13] / num_gms
@@ -207,14 +207,8 @@ for team_row in team_cursor:
 	off_result = off_totals[14] / num_gms
 	def_result = def_totals[14] / num_gms
 	qry_table.add_row("Fourth Down Conversions Attempted", str(off_totals[14]), f"{off_result:.1f}", str(def_totals[14]), f"{def_result:.1f}")
-	if off_totals[14] != 0:
-		off_result = off_totals[13] / off_totals[14]
-	else:
-		off_result = 0
-	if def_totals[14] != 0:
-		def_result = def_totals[13] / def_totals[14]
-	else:
-		def_result = 0
+	off_result = off_totals[13] / off_totals[14] if off_totals[14] > 0 else 0
+	def_result = def_totals[13] / def_totals[14] if def_totals[14] > 0 else 0
 	qry_table.add_row("  Fourth Down Conv. Percent", f"{off_result:2.1%}", "", f"{def_result:2.1%}", "")
 	qry_table.add_row("")
 	off_result = off_totals[15] / num_gms
@@ -230,8 +224,8 @@ for team_row in team_cursor:
 	off_result = off_totals[18] / num_gms
 	def_result = def_totals[18] / num_gms
 	qry_table.add_row("Red Zone Trips", str(off_totals[18]), f"{off_result:.1f}", str(def_totals[18]), f"{def_result:.1f}")
-	off_result = off_totals[17] / off_totals[18]
-	def_result = def_totals[17] / def_totals[18]
+	off_result = off_totals[17] / off_totals[18] if off_totals[18] > 0 else 0
+	def_result = def_totals[17] / def_totals[18] if def_totals[18] > 0 else 0
 	qry_table.add_row("  Red Zone Conversion Percent", f"{off_result:2.1%}", "", f"{def_result:2.1%}", "")
 	qry_table.add_row("")
 	off_result = off_totals[19] / num_gms
