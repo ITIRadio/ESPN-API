@@ -57,17 +57,17 @@ def NBA_post_game(game_number):
 			except:
 				player_name = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['shortName']
 			player_min = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][0]                 
-			player_fg = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][1]
-			player_3pt = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][2]
-			player_ft = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][3]
-			player_reb = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][6]
-			player_oreb = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][4]                
-			player_ast = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][7]
+			player_fg = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][2]
+			player_3pt = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][3]
+			player_ft = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][4]
+			player_reb = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][5]
+			player_oreb = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][10]                
+			player_ast = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][6]
 			player_stl = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][8]                 
 			player_blk = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][9]                 
-			player_to = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][10]                
-			player_fl = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][11]
-			player_pts = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][13]
+			player_to = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][7]                
+			player_fl = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][12]
+			player_pts = NBA_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][1]
 			home_player_stats.add_row(player_name, player_min, player_fg, player_3pt, player_ft, player_reb, player_oreb, player_ast, player_to, player_stl, player_blk, player_fl, player_pts)
 		except IndexError:
 			continue
@@ -129,17 +129,17 @@ def NBA_post_game(game_number):
 			except:
 				player_name = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['shortName']
 			player_min = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][0]                
-			player_fg = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][1]
-			player_3pt = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][2]
-			player_ft = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][3]
-			player_reb = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][6]
-			player_oreb = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][4]               
-			player_ast = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][7]
+			player_fg = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][2]
+			player_3pt = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][3]
+			player_ft = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][4]
+			player_reb = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][5]
+			player_oreb = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][10]               
+			player_ast = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][6]
 			player_stl = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][8]                
 			player_blk = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][9]                 
-			player_to = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][10]                
-			player_fl = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][11]
-			player_pts = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][13]
+			player_to = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][7]                
+			player_fl = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][12]
+			player_pts = NBA_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][1]
 			visitor_player_stats.add_row(player_name, player_min, player_fg, player_3pt, player_ft, player_reb, player_oreb, player_ast, player_to, player_stl, player_blk, player_fl, player_pts)
 		except IndexError:
 			continue
