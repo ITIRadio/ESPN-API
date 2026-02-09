@@ -1,12 +1,9 @@
 # ESPN-API
-### The final regular season NFL statistics SQLite database for '25-'26 has now been included in the repository.
-### College Basketball Update: ESPN is changing the API on a weekly basis. Just as I publish a commit here, the API gets changed. For the time being, I am having to withdraw this utility until the API stabilizes. Hopefully, I'll be able to post a somewhat-permanent commit before the NCAA Tournament.
+### The final regular season NFL statistics SQLite database for '25-'26, with separate databases for regular season and all games including the playoffs.
 
-### *Updates: NFL & CFB now updated for 2025 season, plus new utilities for maintaining a NFL SQLite database throughout the season.*
+Miscellaneous Python Linux command line utilities to access the ESPN API. Primarily designed for post-game box scores, but they can be used for game preview data as available, and in-game partial box scores. Includes utilities for maintaining a NFL SQLite database throughout the season.
 
-Miscellaneous Python Linux command line utilities to access the ESPN API. Primarily designed for post-game box scores, but they can be used for game preview data as available, and in-game partial box scores.
-
-### *About the new NFL SQLite database utilities:*
+### *About the NFL SQLite database utilities:*
 
 1. To set up your own local copy of the SQLite database, run `python3 CreateNFLStatsSqliteDB.py` (with script in desired database directory).
 2. Updates need to be made daily, run `python3 -u ESPNNFLAPISqlite.py YYYYMMDD` (date in YYYYMMDD format, with script & database in desired directory). Doing updates the next day after a game day works best.
@@ -27,10 +24,7 @@ ORDER BY TotalYards DESC;
 5. Be aware though, that ESPN is changing the database over for the new week on Tuesday late afternoons, Eastern US Time. During that time, some box scores become temporarily unavailable, and will thus kick out errors. Time your database updates accordingly. The software simply overwrites previously loaded box scores, should a game's statistics be loaded twice.
 
 ### Other news:
-* New update on the College Basketball API (11-18-25): more changes were made to player statistics, largely undoing the previous changes mentioned below. In addition, the API has added "Team Rebounds" to totals, without adding another category of rebounding totals, or announcing it in any way. A Team Rebound is an accounting statistic that occurs when a missed shot is knocked out of bounds (awarding a Team Rebound to the receiving team), when the first free throw of a set of 2 or 3 free throws is missed (giving a Team Rebound to the shooting team), etc. This statistic is used to balance rebound totals and the aggregate total of all missed shots. Since a separate total is not provided by the API, code has been added to calculate the Team Rebounds. Whether the calculation is correct over the long term will be monitored, as this was added for this season.
-* The College Basketball API had significant changes to the location of player statistics for each game; these changes should be reflected as of November 4, 2025.
-* Some new fields have been added to the NFL API for this season; those have been included in the box score. Also, previews (run on a given date prior to the games) have been upgraded (abbreviated in-game box scores have been kept).
-* The CFB API is pretty much the same, and some issues, like timeouts never updating during games, still remain.
+* Update on the College Basketball API: more changes were made to player statistics, largely undoing the previous changes mentioned below. In addition, the API has added "Team Rebounds" to totals, without adding another category of rebounding totals, or announcing it in any way. A Team Rebound is an accounting statistic that occurs when a missed shot is knocked out of bounds (awarding a Team Rebound to the receiving team), when the first free throw of a set of 2 or 3 free throws is missed (giving a Team Rebound to the shooting team), etc. This statistic is used to balance rebound totals and the aggregate total of all missed shots. Since a separate total is not provided by the API, code has been added to calculate the Team Rebounds. Whether the calculation is correct over the long term will be monitored, as this was added for this season.
 * Some games involving FCS teams are *NOT* being updated live anymore, or have significant amounts of stats missing. Rather, ESPN is waiting for post-game reports to then load to their database. Such games seem to be available by the next day. You can use the current CFB script for FCS games by changing the two url variable assignments in the Mainline to "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=81&limit=200&dates=" and "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=81&limit=200" (group 80 is all FBS & FBS vs. FCS games, group 81 is all FCS games).
 
 *Note about required library install for rich:* Most of the Python libraries are included in most standard Python installs, however, double check & install if necessary. Rich will likely need to be installed in most cases, so use "pip install rich" on the regular command line (see https://pypi.org/project/rich/). If nagged about forced, unncessary "external management", use "sudo apt install python3-rich" (generally, sudo apt install python3-{package-name}).
