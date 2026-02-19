@@ -45,15 +45,14 @@ def NHL_post_game(game_number):
 	visitor_score = NHL_data_json['events'][game_number]['competitions'][0]['competitors'][1]['score']
 	visitor_record = NHL_event_data_json['header']['competitions'][0]['competitors'][1]['record'][0]['displayValue']
 	visitor_short = NHL_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['shortDisplayName']
-	home_team_stats = " " + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][4]['displayValue']) + "/" + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][5]['displayValue']) + " Power Plays, " + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][12]['displayValue']) + "/" + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][13]['displayValue']) + " Penalties, " + str(NHL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue']) + " Team Save Pct."
-	visitor_team_stats = " " + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][4]['displayValue']) + "/" + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][5]['displayValue']) + " Power Plays, " + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][12]['displayValue']) + "/" + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][13]['displayValue']) + " Penalties, " + str(NHL_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue']) + " Team Save Pct."
 
-	home_player_stats = Table(box=None, header_style="default") 
+	home_player_stats = Table(box=None, header_style="default")     # Column headers off, console & txt files, keep extra assignments/player
 	home_info = home_short + " (" + home_record + ")"
 	home_player_stats.add_column(home_info)
 	home_player_stats.add_column("Shots", justify="right")
 	home_player_stats.add_column("+/-", justify="right")
 	home_player_stats.add_column("Time on Ice", justify="right")
+	home_player_stats.add_column("Pen-Min", justify="right")
 	home_player_stats.add_column("Miss", justify="right")
 	home_player_stats.add_column("Blks", justify="right")
 	home_player_stats.add_column("Hits", justify="right")
@@ -71,7 +70,7 @@ def NHL_post_game(game_number):
 			player_shots = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][12])
 			player_pen = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][19])
 			player_pim = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][20])
-			player_plusminus = int(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][3])  
+			player_plusminus = int(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][3])   #Cast int for compare
 			if player_plusminus > 0:
 				player_plusminus = "+" + str(player_plusminus)
 			else:
@@ -79,7 +78,7 @@ def NHL_post_game(game_number):
 			player_toi = NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][4]
 			player_goals = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][9])
 			player_ytdgoals = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][10])   #Future Use
-			player_ast = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][11])
+			player_ast = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][11])        #Future Use
 			player_miss = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][13])
 			player_blks = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][0])
 			player_hits = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][1])
@@ -89,7 +88,7 @@ def NHL_post_game(game_number):
 			player_gives = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][18])
 			home_miss = home_miss + int(player_miss)
 
-			home_player_stats.add_row(player_name, player_shots, player_plusminus, player_toi, player_miss, player_blks, player_hits, player_fow + "-" + player_fol, player_tks, player_gives)
+			home_player_stats.add_row(player_name, player_shots, player_plusminus, player_toi, player_pen + "-" + player_pim, player_miss, player_blks, player_hits, player_fow + "-" + player_fol, player_tks, player_gives)
 			
 		except IndexError:
 			continue
@@ -120,7 +119,7 @@ def NHL_post_game(game_number):
 			player_gives = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][18])
 			home_miss = home_miss + int(player_miss)
 			
-			home_player_stats.add_row(player_name, player_shots, player_plusminus, player_toi, player_miss, player_blks, player_hits, player_fow + "-" + player_fol, player_tks, player_gives)
+			home_player_stats.add_row(player_name, player_shots, player_plusminus, player_toi, player_pen + "-" + player_pim, player_miss, player_blks, player_hits, player_fow + "-" + player_fol, player_tks, player_gives)
 			
 		except IndexError:
 			continue
@@ -136,7 +135,8 @@ def NHL_post_game(game_number):
 			player_ga = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][0])
 			player_pct = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][5])
 			player_toi = NHL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][9]
-			home_goaltender_stats = home_goaltender_stats + player_name + " " + player_saves + " Saves, " + player_ga + " Goals Against, " + player_pct + " Save Percent, " + player_toi + " Time On Ice, "
+			player_pim = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][11])
+			home_goaltender_stats = home_goaltender_stats + player_name + " " + player_saves + " Saves, " + player_ga + " Goals Against, " + player_pct + " Save Percent, " + player_toi + " Time On Ice, " + player_pim + " Penalty Min, "
 		except IndexError:
 			continue
 	home_goaltender_stats = home_goaltender_stats[:-2]	
@@ -147,6 +147,7 @@ def NHL_post_game(game_number):
 	visitor_player_stats.add_column("Shots", justify="right")
 	visitor_player_stats.add_column("+/-", justify="right")
 	visitor_player_stats.add_column("Time on Ice", justify="right")
+	visitor_player_stats.add_column("Pen-Min", justify="right")
 	visitor_player_stats.add_column("Miss", justify="right")
 	visitor_player_stats.add_column("Blks", justify="right")
 	visitor_player_stats.add_column("Hits", justify="right")
@@ -182,7 +183,7 @@ def NHL_post_game(game_number):
 			player_gives = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][18])
 			visitor_miss = visitor_miss + int(player_miss)
 			
-			visitor_player_stats.add_row(player_name, player_shots, player_plusminus, player_toi, player_miss, player_blks, player_hits, player_fow + "-" + player_fol, player_tks, player_gives)
+			visitor_player_stats.add_row(player_name, player_shots, player_plusminus, player_toi, player_pen + "-" + player_pim, player_miss, player_blks, player_hits, player_fow + "-" + player_fol, player_tks, player_gives)
 			
 		except IndexError:
 			continue
@@ -213,7 +214,7 @@ def NHL_post_game(game_number):
 			player_gives = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][18])
 			visitor_miss = visitor_miss + int(player_miss)
 			
-			visitor_player_stats.add_row(player_name, player_shots, player_plusminus, player_toi, player_miss, player_blks, player_hits, player_fow + "-" + player_fol, player_tks, player_gives)
+			visitor_player_stats.add_row(player_name, player_shots, player_plusminus, player_toi, player_pen + "-" + player_pim, player_miss, player_blks, player_hits, player_fow + "-" + player_fol, player_tks, player_gives)
 			
 		except IndexError:
 			continue
@@ -229,24 +230,34 @@ def NHL_post_game(game_number):
 			player_ga = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][0])
 			player_pct = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][5])
 			player_toi = NHL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][9]
-			visitor_goaltender_stats = visitor_goaltender_stats + player_name + " " + player_saves + " Saves, " + player_ga + " Goals Against, " + player_pct + " Save Percent, " + player_toi + " Time On Ice, "
+			player_pim = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][11])
+			visitor_goaltender_stats = visitor_goaltender_stats + player_name + " " + player_saves + " Saves, " + player_ga + " Goals Against, " + player_pct + " Save Percent, " + player_toi + " Time On Ice, " + player_pim + " Penalty Min, "
 		except IndexError:
 			continue
 	visitor_goaltender_stats = visitor_goaltender_stats[:-2]	
 	
-	home_player_stats.add_row("Totals", str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue']), "", "",str(home_miss), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][1]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue']) + "-" + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][2]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][11]['displayValue']))
-	home_player_stats.add_row("On Goal Pct.", str(format(int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue']) / (int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue']) + int(home_miss) + int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue'])), ".1%")),"","","","","", str(format(int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue']) / (int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue']) + int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue'])), ".1%")))
+	home_player_stats.add_row("Totals", str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue']), "", "", str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][12]['displayValue']) + "-" + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][13]['displayValue']), str(home_miss), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][1]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue']) + "-" + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][2]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][11]['displayValue']))
+	home_player_stats.add_row("On Goal Pct.", str(format(int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue']) / (int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue']) + int(home_miss) + int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue'])), ".1%")),"","","","","", "", str(format(int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue']) / (int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue']) + int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue'])), ".1%")))
 	home_player_stats.add_row("Shooting Pct.", str(format(int(home_score) / (int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue']) + int(home_miss) + int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue'])), ".1%")))
 	
-	visitor_player_stats.add_row("Totals", str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue']), "", "",str(visitor_miss), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][1]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue']) + "-" + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][2]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][11]['displayValue']))
-	visitor_player_stats.add_row("On Goal Pct.", str(format(int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue']) / (int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue']) + int(visitor_miss) + int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue'])), ".1%")),"","","","","", str(format(int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue']) / (int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue']) + int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue'])), ".1%")))
+	visitor_player_stats.add_row("Totals", str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue']), "", "", str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][12]['displayValue']) + "-" + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][13]['displayValue']), str(visitor_miss), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][1]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue']) + "-" + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][2]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][11]['displayValue']))
+	visitor_player_stats.add_row("On Goal Pct.", str(format(int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue']) / (int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue']) + int(visitor_miss) + int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue'])), ".1%")),"","","","","", "", str(format(int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue']) / (int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue']) + int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue'])), ".1%")))
 	visitor_player_stats.add_row("Shooting Pct.", str(format(int(visitor_score) / (int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue']) + int(visitor_miss) + int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue'])), ".1%")))
 	
+	home_team_stats = " " + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][4]['displayValue']) + "/" + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][5]['displayValue']) + " Power Plays, " + str(NHL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue']) + " Team Save Pct."
+	visitor_team_stats = " " + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][4]['displayValue']) + "/" + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][5]['displayValue']) + " Power Plays, " + str(NHL_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue']) + " Team Save Pct."
+
 	penalties = " Penalties:\n  "
 	goals = " Goals:\n  "
 	for play in range(0,1000):
 		try:
 			play_type = NHL_event_data_json['plays'][play]['type']['abbreviation']
+			try:                 # Update to API, abbr for pens isn't penalty, but a penaltyMinutes is added > 0, try & assign & test for that
+				is_pen = int(NHL_event_data_json['plays'][play]['type']['penaltyMinutes'])
+			except:
+				is_pen = 0
+			if is_pen > 0:
+				play_type = "penalty"
 			play_team_id = NHL_event_data_json['plays'][play]['team']['id']
 			if play_team_id == home_team_id:
 				play_team_abbr = home_team_abbr
@@ -256,14 +267,14 @@ def NHL_post_game(game_number):
 				penalties = penalties + NHL_event_data_json['plays'][play]['text'] + " (" + play_team_abbr + ", " + NHL_event_data_json['plays'][play]['period']['displayValue'] + ", " + NHL_event_data_json['plays'][play]['clock']['displayValue'] + ")\n  "
 			if play_type == "goal":
 				goals = goals + NHL_event_data_json['plays'][play]['text'] + " (" + play_team_abbr + ", " + NHL_event_data_json['plays'][play]['period']['displayValue'] + ", " + NHL_event_data_json['plays'][play]['clock']['displayValue'] + ", " + NHL_event_data_json['plays'][play]['strength']['text'] + ")\n  "
-		except (IndexError, KeyError) as api_bad_data_problem:
+		except (IndexError, KeyError) as api_bad_data_problem:  #Drive Result sometimes throws error, catch as additional exception, just skip as blank ok
 			continue
 
-	if penalties == " Penalties: ":
+	if penalties == " Penalties:\n ":
 		penalties = " No Penalties."
 	else:
 		penalties = penalties[:-3]
-	if goals == " Goals: ":
+	if goals == " Goals:\n ":
 		goals = " No Regulation or Overtime Goals."
 	else:
 		goals = goals[:-3]
@@ -287,13 +298,54 @@ def NHL_post_game(game_number):
 					start_shootout_log = 0
 				if play_text[0:17] == "Start of Shootout":
 					start_shootout_log = 1
-			except (IndexError, KeyError) as api_bad_data_problem:
+			except (IndexError, KeyError) as api_bad_data_problem:  #Drive Result sometimes throws error, catch as additional exception
 				continue
 		if shootout == " Shootout: ":
 			shootout = " No Shootout log available."
 		else:
 			shootout = shootout[:-2]
 
+	period_goals = Table(box=None, header_style="default")
+	period_goals.add_column("", justify="right")
+	period_goals.add_column(visitor_team_abbr, justify="right")
+	period_goals.add_column(visitor_team_abbr, justify="right")
+	period_goals.add_column(home_team_abbr, justify="right")
+	period_goals.add_column(home_team_abbr, justify="right")
+	period_goals.add_row("Period", "G", "SOG", "G", "SOG")
+	
+	current_period = 1
+	home_period_shots = 0
+	visitor_period_shots = 0
+	home_total_shots = 0
+	visitor_total_shots = 0
+
+	for play in range(0,1000):
+		try:
+			play_text = NHL_event_data_json['plays'][play]['type']['abbreviation']
+			play_period = NHL_event_data_json['plays'][play]['period']['number']
+			play_team_id = NHL_event_data_json['plays'][play]['team']['id']
+			if play_period != current_period:
+				period_goals.add_row(str(current_period), NHL_event_data_json['header']['competitions'][0]['competitors'][1]['linescores'][current_period-1]['displayValue'], str(visitor_period_shots), NHL_event_data_json['header']['competitions'][0]['competitors'][0]['linescores'][current_period-1]['displayValue'], str(home_period_shots))
+				home_total_shots = home_total_shots + home_period_shots
+				visitor_total_shots = visitor_total_shots + visitor_period_shots
+				current_period = current_period + 1
+				home_period_shots = 0
+				visitor_period_shots = 0
+			if play_text == "shot-on-goal" or play_text == "goal":
+				if play_team_id == home_team_id:
+					home_period_shots = home_period_shots + 1
+				else:
+					visitor_period_shots = visitor_period_shots + 1			
+		except (IndexError, KeyError) as api_bad_data_problem:  #Drive Result sometimes throws error, catch as additional exception, just skip as blank ok
+			continue
+	
+	if game_status != "Final/SO":
+		home_total_shots = home_total_shots + home_period_shots
+		visitor_total_shots = visitor_total_shots + visitor_period_shots
+		period_goals.add_row(str(current_period), NHL_event_data_json['header']['competitions'][0]['competitors'][1]['linescores'][current_period-1]['displayValue'], str(visitor_period_shots), NHL_event_data_json['header']['competitions'][0]['competitors'][0]['linescores'][current_period-1]['displayValue'], str(home_period_shots))
+	
+	period_goals.add_row("Totals", str(NHL_data_json['events'][game_number]['competitions'][0]['competitors'][1]['score']), str(visitor_total_shots), str(NHL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['score']), str(home_total_shots))
+	
 	home_periods = ""
 	visitor_periods = ""
 	for period in range(0, 12):
@@ -353,6 +405,8 @@ def NHL_post_game(game_number):
 	else:
 		print()
 	
+	console.print(period_goals)
+	print()
 	print(goals)
 	print()
 	print(penalties)
@@ -373,7 +427,10 @@ def NHL_post_game(game_number):
 
 	if article != "":
 		print(article + "\n")
-
+		
+	print("------------------------------------------------")
+	print()
+	
 def NHL_in_progress(game_number):
 
 	arena = NHL_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
