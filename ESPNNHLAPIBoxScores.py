@@ -128,14 +128,14 @@ def NHL_post_game(game_number):
 	for player in range(0, 5): #Goalies
 		try:
 			try:
-				player_name = NHL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['athlete']['displayName']
+				player_name = NHL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['athlete']['displayName']
 			except:
-				player_name = NHL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['athlete']['shortName']
-			player_saves = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][4])
-			player_ga = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][0])
-			player_pct = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][5])
-			player_toi = NHL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][9]
-			player_pim = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][11])
+				player_name = NHL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['athlete']['shortName']
+			player_saves = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][4])
+			player_ga = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][0])
+			player_pct = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][5])
+			player_toi = NHL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][9]
+			player_pim = str(NHL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][11])
 			home_goaltender_stats = home_goaltender_stats + player_name + " " + player_saves + " Saves, " + player_ga + " Goals Against, " + player_pct + " Save Percent, " + player_toi + " Time On Ice, " + player_pim + " Penalty Min, "
 		except IndexError:
 			continue
@@ -223,14 +223,14 @@ def NHL_post_game(game_number):
 	for player in range(0, 5): #Goalies
 		try:
 			try:
-				player_name = NHL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['athlete']['displayName']
+				player_name = NHL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['athlete']['displayName']
 			except:
-				player_name = NHL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['athlete']['shortName']
-			player_saves = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][4])
-			player_ga = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][0])
-			player_pct = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][5])
-			player_toi = NHL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][9]
-			player_pim = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][11])
+				player_name = NHL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['athlete']['shortName']
+			player_saves = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][4])
+			player_ga = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][0])
+			player_pct = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][5])
+			player_toi = NHL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][9]
+			player_pim = str(NHL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][11])
 			visitor_goaltender_stats = visitor_goaltender_stats + player_name + " " + player_saves + " Saves, " + player_ga + " Goals Against, " + player_pct + " Save Percent, " + player_toi + " Time On Ice, " + player_pim + " Penalty Min, "
 		except IndexError:
 			continue
