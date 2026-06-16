@@ -1,7 +1,8 @@
 # ESPN-API
 ### World Cup box scores now available.
 
-Usage: python3 ESPNNFLAPIBoxScores.py YYYYMMDD YYYYMMDD
+Usage: python3 ESPNWorldCupSoccerAPIBoxScores.py YYYYMMDD YYYYMMDD
+
 Due to fewer games being held per day and thus fewer API calls being required, two date parameters are allowed, earliest date first (otherwise will return no games). One date parm receives games from that day (US Eastern time), and no parms returns today's games. Previews for future games & summaries of games in progress also included.
 
 Miscellaneous Python Linux command line utilities to access the ESPN API. Primarily designed for post-game box scores, but they can be used for game preview data as available, and in-game partial box scores. Includes utilities for maintaining a NFL SQLite database throughout the season.
