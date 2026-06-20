@@ -91,22 +91,20 @@ def summary(game_number):
 	print()
 	
 	game_events = " Game Summary:\n "
-	try:
-		for game_event_index in range(0, 50):
-			try:
-				if world_cup_json['events'][game_number]['competitions'][0]['details'][game_event_index]['team']['id'] == home_id:
-					game_events = game_events + home_abbr + " -- "
-				else:
-					game_events = game_events + visitor_abbr + " -- "
-				game_events = game_events + world_cup_json['events'][game_number]['competitions'][0]['details'][game_event_index]['clock']['displayValue'] + ": "
-				game_events = game_events + world_cup_json['events'][game_number]['competitions'][0]['details'][game_event_index]['type']['text'] + ", "
-				game_events = game_events + world_cup_json['events'][game_number]['competitions'][0]['details'][game_event_index]['athletesInvolved'][0]['displayName'] + "\n "
-			except IndexError:
-				continue
-	except:
-		game_events = "No game details available."
-	game_events = game_events[:-2]
-	print(game_events)
+	for game_event_index in range(0, 50):
+		try:                           #Possible no events or phantom events w/no athletes (didn't occur), add event only if all indexes exist
+			event_plyr = world_cup_json['events'][game_number]['competitions'][0]['details'][game_event_index]['athletesInvolved'][0]['displayName']
+			event_team_id = world_cup_json['events'][game_number]['competitions'][0]['details'][game_event_index]['team']['id']
+			event_time = world_cup_json['events'][game_number]['competitions'][0]['details'][game_event_index]['clock']['displayValue']
+			event_text = world_cup_json['events'][game_number]['competitions'][0]['details'][game_event_index]['type']['text']
+		except (IndexError, KeyError) as api_bad_data_problem:        #Requires both error cases, on either none or no remaining event, or phantom event
+			continue
+		event_team_abbr = home_abbr if event_team_id == home_id else visitor_abbr
+		game_events = game_events + event_team_abbr + " -- " + event_time + ": " + event_text + ", " + event_plyr + "\n "
+
+	if game_events != " Game Summary:\n ":
+		game_events = game_events[:-2]
+		print(game_events)
 
 
 def box_score(game_number):
