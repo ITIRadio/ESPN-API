@@ -49,8 +49,14 @@ def summary(game_number):
 		attendance = str(world_cup_json['events'][game_number]['competitions'][0]['attendance'])
 	except:
 		attendance = ""
-	home_record = world_cup_json['events'][game_number]['competitions'][0]['competitors'][0]['records'][0]['summary']
-	visitor_record = world_cup_json['events'][game_number]['competitions'][0]['competitors'][1]['records'][0]['summary']
+	try:
+		home_record = world_cup_json['events'][game_number]['competitions'][0]['competitors'][0]['records'][0]['summary']
+	except:
+		home_record = ""
+	try:
+		visitor_record = world_cup_json['events'][game_number]['competitions'][0]['competitors'][1]['records'][0]['summary']
+	except:
+		visitor_record = ""
 	home_score = str(world_cup_json['events'][game_number]['competitions'][0]['competitors'][0]['score'])
 	visitor_score = str(world_cup_json['events'][game_number]['competitions'][0]['competitors'][1]['score'])
 	home_fouls_committed = str(world_cup_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue'])
@@ -66,15 +72,20 @@ def summary(game_number):
 
 	score_box = Table(box=None, header_style="default")
 	score_box.add_column(status)
-	score_box.add_column("Record")
+	if home_record != "" and visitor_record != "":
+		score_box.add_column("Record")
 	score_box.add_column("Goals", justify="right")
 	score_box.add_column("Possession", justify="right")
 	score_box.add_column("Shots on Goal", justify="right")
 	score_box.add_column("Shots Attempted", justify="right")
 	score_box.add_column("Fouls Committed", justify="right")
 	score_box.add_column("Corners", justify="right")
-	score_box.add_row(home, home_record, home_score, home_possession, home_sog, home_shot_att, home_fouls_committed, home_corners)
-	score_box.add_row(visitor, visitor_record, visitor_score, visitor_possession, visitor_sog, visitor_shot_att, visitor_fouls_committed, visitor_corners)
+	if home_record != "" and visitor_record != "":
+		score_box.add_row(home, home_record, home_score, home_possession, home_sog, home_shot_att, home_fouls_committed, home_corners)
+		score_box.add_row(visitor, visitor_record, visitor_score, visitor_possession, visitor_sog, visitor_shot_att, visitor_fouls_committed, visitor_corners)
+	else:
+		score_box.add_row(home, home_score, home_possession, home_sog, home_shot_att, home_fouls_committed, home_corners)
+		score_box.add_row(visitor, visitor_score, visitor_possession, visitor_sog, visitor_shot_att, visitor_fouls_committed, visitor_corners)
 	console.print(score_box)
 	
 	try:
