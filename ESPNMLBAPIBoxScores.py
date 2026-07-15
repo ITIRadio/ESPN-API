@@ -536,13 +536,13 @@ def MLB_pre_game(game_number):
 	home = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
 	visitor = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['displayName']
 	game_status = MLB_data_json['events'][game_number]['status']['type']['shortDetail']
+	home_total_games = 0
+	visitor_total_games = 0
 	try:
 		home_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['records'][0]['summary']
 		visitor_record = MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['records'][0]['summary']
 		home_record_list = re.split('[-()]', home_record)
 		visitor_record_list = re.split('[-()]', visitor_record)
-		home_total_games = 0
-		visitor_total_games = 0
 		for i in home_record_list:
 			home_total_games = home_total_games + int(i)
 		for i in visitor_record_list:
