@@ -1,9 +1,23 @@
 import sqlite3
+import os
+import sys
+
+if len(sys.argv) == 2:
+	db_file_name = str(sys.argv[1])
+else:
+	print("Use one parameter, a new .sqlite file name.")
+	exit()
+if os.path.isfile(db_file_name):
+	print("File already exists. Use new file name as this process destroys data.")
+	exit()
+try:
+	db_conn = sqlite3.connect(db_file_name)
+	db_cursor = db_conn.cursor()
+except sqlite3.Error as err:
+	print("Database creation error.")
+	exit()
 
 try:
-
-	db_conn = sqlite3.connect('NFLStats2025.db')
-	db_cursor = db_conn.cursor()
 
 	create_table = '''
 	CREATE TABLE IF NOT EXISTS passing (
@@ -174,6 +188,8 @@ try:
 		passes_defensed INTEGER NOT NULL,
 		qb_hits INTEGER NOT NULL,
 		tds INTEGER NOT NULL,
+		ff INTEGER NOT NULL,
+		fr INTEGER NOT NULL,
 		PRIMARY KEY (player_id, game_date)
 	);
 	'''
@@ -215,6 +231,19 @@ try:
 	'''
 	db_cursor.execute(create_table)	
 
+	create_table = '''
+	CREATE TABLE IF NOT EXISTS scoring_plays (
+		team_abbr TEXT NOT NULL,
+		game_date TEXT NOT NULL,
+		opponent_abbr TEXT NOT NULL,
+		home_visitor TEXT NOT NULL,
+		play_descr TEXT NOT NULL,
+		qtr INTEGER NOT NULL,
+		play_time TEXT NOT NULL
+	);
+	'''
+	db_cursor.execute(create_table)
+	
 	db_conn.commit()
 
 	print("Blank database successfully created.")
@@ -225,5 +254,4 @@ except sqlite3.Error as err:
 finally:
 	if db_conn:
 		db_conn.close()
-
 

@@ -1,4 +1,5 @@
 import sqlite3
+import sys
 from rich.console import Console
 from rich.table import Table
 from datetime import datetime
@@ -10,8 +11,14 @@ today = today_date.strftime("%B %d, %Y")
 
 console = Console()
 
+if len(sys.argv) == 2:
+	db_file_name = str(sys.argv[1])
+else:
+	print("Use one parameter, a new .sqlite file name.")
+	exit()
+
 try:
-	db_conn = sqlite3.connect('NFLStats2025.db')
+	db_conn = sqlite3.connect(db_file_name)
 	team_cursor = db_conn.cursor()
 	individ_cursor = db_conn.cursor()
 	gm_cursor = db_conn.cursor()
@@ -278,7 +285,7 @@ for team_row in team_cursor:
 		name = individ_row[0]
 		plyr_id = individ_row[1]
 		
-		qry = """SELECT game_date, opponent_abbr, home_visitor, tackles, solo, sacks, for_loss, passes_defensed, qb_hits, tds
+		qry = """SELECT game_date, opponent_abbr, home_visitor, tackles, solo, sacks, for_loss, passes_defensed, qb_hits, tds, ff, fr
 				FROM individual_defense
 				WHERE player_id = ? AND team_abbr = ?
 				ORDER BY game_date ASC"""
@@ -297,8 +304,10 @@ for team_row in team_cursor:
 		qry_table.add_column("PD", justify="right")
 		qry_table.add_column("QB Hit", justify="right")
 		qry_table.add_column("TD", justify="right")
+		qry_table.add_column("FF", justify="right")
+		qry_table.add_column("FR", justify="right")
 		
-		ttl_tkl = ttl_solo = ttl_sack = ttl_int = ttl_retn_yds = ttl_for_loss = ttl_pd = ttl_qb_hit = ttl_td = 0
+		ttl_tkl = ttl_solo = ttl_sack = ttl_int = ttl_retn_yds = ttl_for_loss = ttl_pd = ttl_qb_hit = ttl_td = ttl_ff = ttl_fr = 0
 		
 		for gm_row in gm_cursor:
 			game_date_dt = datetime.strptime(gm_row[0], "%Y%m%d")
@@ -312,13 +321,13 @@ for team_row in team_cursor:
 			int_retn = int_cursor.fetchone()
 		
 			if int_retn[0] == None:
-				qry_table.add_row(game_date, at_vs, gm_row[1], str(gm_row[3]), str(gm_row[4]), str(gm_row[5]), "0", "0", str(gm_row[6]), str(gm_row[7]), str(gm_row[8]), str(gm_row[9]))
-				ttl_tkl += gm_row[3]; ttl_solo += gm_row[4]; ttl_sack += gm_row[5]; ttl_for_loss += gm_row[6]; ttl_pd += gm_row[7]; ttl_qb_hit += gm_row[8]; ttl_td += gm_row[9]
+				qry_table.add_row(game_date, at_vs, gm_row[1], str(gm_row[3]), str(gm_row[4]), str(gm_row[5]), "0", "0", str(gm_row[6]), str(gm_row[7]), str(gm_row[8]), str(gm_row[9]), str(gm_row[10]), str(gm_row[11]))
+				ttl_tkl += gm_row[3]; ttl_solo += gm_row[4]; ttl_sack += gm_row[5]; ttl_for_loss += gm_row[6]; ttl_pd += gm_row[7]; ttl_qb_hit += gm_row[8]; ttl_td += gm_row[9]; ttl_ff += gm_row[10]; ttl_fr += gm_row[11]
 			else:
-				qry_table.add_row(game_date, at_vs, gm_row[1], str(gm_row[3]), str(gm_row[4]), str(gm_row[5]), str(int_retn[0]), str(int_retn[1]),     str(gm_row[6]), str(gm_row[7]), str(gm_row[8]), str(gm_row[9]))
-				ttl_tkl += gm_row[3]; ttl_solo += gm_row[4]; ttl_sack += gm_row[5]; ttl_for_loss += gm_row[6]; ttl_pd += gm_row[7]; ttl_qb_hit += gm_row[8]; ttl_td += gm_row[9]; ttl_int += int_retn[0]; ttl_retn_yds += int_retn[1]		
+				qry_table.add_row(game_date, at_vs, gm_row[1], str(gm_row[3]), str(gm_row[4]), str(gm_row[5]), str(int_retn[0]), str(int_retn[1]),     str(gm_row[6]), str(gm_row[7]), str(gm_row[8]), str(gm_row[9]), str(gm_row[10]), str(gm_row[11]))
+				ttl_tkl += gm_row[3]; ttl_solo += gm_row[4]; ttl_sack += gm_row[5]; ttl_for_loss += gm_row[6]; ttl_pd += gm_row[7]; ttl_qb_hit += gm_row[8]; ttl_td += gm_row[9]; ttl_ff += gm_row[10]; ttl_fr += gm_row[11]; ttl_int += int_retn[0]; ttl_retn_yds += int_retn[1]		
 
-		qry_table.add_row("Totals", "", "", str(ttl_tkl), str(ttl_solo), str(ttl_sack), str(ttl_int), str(ttl_retn_yds), str(ttl_for_loss), str(ttl_pd), str(ttl_qb_hit), str(ttl_td))
+		qry_table.add_row("Totals", "", "", str(ttl_tkl), str(ttl_solo), str(ttl_sack), str(ttl_int), str(ttl_retn_yds), str(ttl_for_loss), str(ttl_pd), str(ttl_qb_hit), str(ttl_td), str(ttl_ff), str(ttl_fr))
 		console.print(qry_table)
 		print()
 		

@@ -1,4 +1,5 @@
 import sqlite3
+import sys
 from rich.console import Console
 from rich.table import Table
 from datetime import datetime
@@ -10,8 +11,14 @@ today = today_date.strftime("%B %d, %Y")
 
 console = Console()
 
+if len(sys.argv) == 2:
+	db_file_name = str(sys.argv[1])
+else:
+	print("Use one parameter, a new .sqlite file name.")
+	exit()
+
 try:
-	db_conn = sqlite3.connect('NFLStats2025.db')
+	db_conn = sqlite3.connect(db_file_name)
 	team_cursor = db_conn.cursor()
 	qry_cursor = db_conn.cursor()
 except sqlite3.Error as err:
@@ -320,6 +327,7 @@ for team_row in team_cursor:
 	qry_table.add_column("TD", justify="right")
 	qry_table.add_column("Long", justify="right")
 	qry_table.add_column("Tgt", justify="right")
+	qry_table.add_column("Recept Pct", justify="right")
 	qry_table.add_column("100+", justify="right")
 	
 	qry = """SELECT display_name, SUM(receptions) as ttl_recept, SUM(yards_receiving) AS yds, SUM(tds_receiving), MAX(long), SUM(targets), COUNT(*) as gms, COUNT(CASE WHEN yards_receiving > 99 THEN 1 END)
@@ -328,22 +336,24 @@ for team_row in team_cursor:
 			GROUP BY player_id
 			ORDER BY yds DESC, ttl_recept DESC"""
 	qry_cursor.execute(qry, (abbr,))
-	rec = yds = td = h100 = long = tgt = 0
+	rec = yds = td = h100 = long = tgt = 0               #Initialize team totals
 	
 	for qry_row in qry_cursor:
 		if qry_row[1] > 0:
 			yds_per_gm = qry_row[2] / qry_row[6]
+			pct = qry_row[1] / qry_row[5] if qry_row[5] > 0 else 0
 			if qry_row[1] != 0:                     # In list if have tgt
 				yds_per_rec = qry_row[2] / qry_row[1]
 			else:
 				yds_per_rec = 0
-			qry_table.add_row(qry_row[0], str(qry_row[6]), str(qry_row[1]), str(qry_row[2]), f"{yds_per_rec:.1f}", f"{yds_per_gm:.1f}", str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[7]))
+			qry_table.add_row(qry_row[0], str(qry_row[6]), str(qry_row[1]), str(qry_row[2]), f"{yds_per_rec:.1f}", f"{yds_per_gm:.1f}", str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), f"{pct:2.1%}", str(qry_row[7]))
 			rec += qry_row[1]; yds += qry_row[2]; td += qry_row[3]; tgt += qry_row[5]; h100 += qry_row[7]
 			long = qry_row[4] if qry_row[4] > long else long
 	
 	ttl_yds_per_rec = yds / rec
 	ttl_yds_per_game = yds / num_gms	
-	qry_table.add_row("Totals", "", str(rec), str(yds), f"{ttl_yds_per_rec:.1f}", f"{ttl_yds_per_game:.1f}", str(td), str(long), str(tgt), str(h100))
+	ttl_pct = rec / tgt
+	qry_table.add_row("Totals", "", str(rec), str(yds), f"{ttl_yds_per_rec:.1f}", f"{ttl_yds_per_game:.1f}", str(td), str(long), str(tgt), f"{ttl_pct:2.1%}", str(h100))
 	console.print(qry_table)
 	print()
 
@@ -521,20 +531,22 @@ for team_row in team_cursor:
 	qry_table.add_column("PD", justify="right")
 	qry_table.add_column("QB Hit", justify="right")
 	qry_table.add_column("TD", justify="right")
+	qry_table.add_column("FF", justify="right")
+	qry_table.add_column("FR", justify="right")
 	
-	qry = """SELECT display_name, SUM(tackles) as tkls, SUM(solo) as lone, SUM(sacks) AS sack, SUM(for_loss), SUM(passes_defensed), SUM(qb_hits), SUM(tds), COUNT(*) as gms
+	qry = """SELECT display_name, SUM(tackles) as tkls, SUM(solo) as lone, SUM(sacks) AS sack, SUM(for_loss), SUM(passes_defensed), SUM(qb_hits), SUM(tds), SUM(ff), SUM(fr), COUNT(*) as gms
 			FROM individual_defense
 			WHERE team_abbr = ?
 			GROUP BY player_id
 			ORDER BY tkls DESC, lone DESC, sack DESC"""
 	qry_cursor.execute(qry, (abbr,))
-	tkl = solo = sks = tfl = pd = hit = td = 0
+	tkl = solo = sks = tfl = pd = hit = td = ff = fr = 0
 	
 	for qry_row in qry_cursor:
-		qry_table.add_row(qry_row[0], str(qry_row[8]), str(qry_row[1]), str(qry_row[2]), str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[6]), str(qry_row[7]))
-		tkl += qry_row[1]; solo += qry_row[2]; sks += qry_row[3]; tfl += qry_row[4]; pd += qry_row[5]; hit += qry_row[6]; td += qry_row[7]
+		qry_table.add_row(qry_row[0], str(qry_row[10]), str(qry_row[1]), str(qry_row[2]), str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[6]), str(qry_row[7]), str(qry_row[8]), str(qry_row[9]))
+		tkl += qry_row[1]; solo += qry_row[2]; sks += qry_row[3]; tfl += qry_row[4]; pd += qry_row[5]; hit += qry_row[6]; td += qry_row[7]; ff += qry_row[8]; fr += qry_row[9]
 	
-	qry_table.add_row("Totals", "", str(tkl), str(solo), str(sks), str(tfl), str(pd), str(hit), str(td))
+	qry_table.add_row("Totals", "", str(tkl), str(solo), str(sks), str(tfl), str(pd), str(hit), str(td), str(ff), str(fr))
 	console.print(qry_table)
 	print()
 	
@@ -640,11 +652,11 @@ for top_40 in range(1, 41):
 console.print(qry_table)
 print("\f")
 
-# Receiving
+# Receiving by Yds
 
 qry_table = Table(box=None, header_style="default")
 qry_table.add_column("", justify="right")
-qry_table.add_column("Receiving Leaders")
+qry_table.add_column("Receiving Leaders by Yds")
 qry_table.add_column("")
 qry_table.add_column("Gms", justify="right")
 qry_table.add_column("Recepts", justify="right")
@@ -677,7 +689,44 @@ for top_60 in range(1, 61):               #Python always has to go one past
 console.print(qry_table)
 print("\f")
 
-# Defense Leaders
+# Receiving by Recept
+
+qry_table = Table(box=None, header_style="default")
+qry_table.add_column("", justify="right")
+qry_table.add_column("Receiving Leaders by Recept")
+qry_table.add_column("")
+qry_table.add_column("Gms", justify="right")
+qry_table.add_column("Recepts", justify="right")
+qry_table.add_column("Yds", justify="right")
+qry_table.add_column("Yds/Recept", justify="right")
+qry_table.add_column("Yds/Gm", justify="right")
+qry_table.add_column("TD", justify="right")
+qry_table.add_column("Long", justify="right")
+
+qry = """SELECT display_name as Name, 
+		team_abbr as Team, 
+		SUM(receptions) as Recepts, 
+		SUM(yards_receiving) as TotalYards, 
+		SUM(tds_receiving) as TDs,
+		MAX(long) as Long,
+		COUNT(*) as gms
+		FROM receiving
+		GROUP BY display_name
+		ORDER BY Recepts DESC, TotalYards DESC, TDs DESC"""
+qry_cursor.execute(qry)
+
+for top_60 in range(1, 61):               #Python always has to go one past
+	qry_row = qry_cursor.fetchone()
+	if qry_row != None:
+		if qry_row[2] > 0:
+			yds_per_gm = qry_row[3] / qry_row[6]
+			yds_per_recept = qry_row[3] / qry_row[2]
+			qry_table.add_row(str(top_60), qry_row[0], qry_row[1], str(qry_row[6]), str(qry_row[2]), str(qry_row[3]), f"{yds_per_recept:.1f}", f"{yds_per_gm:.1f}", str(qry_row[4]), str(qry_row[5]))
+	
+console.print(qry_table)
+print("\f")
+
+# Defense Leaders by Tackles
 
 qry_table = Table(box=None, header_style="default")
 qry_table.add_column("", justify="right")
@@ -704,7 +753,7 @@ for top_40 in range(1, 41):
 		qry_table.add_row(str(top_40), qry_row[0], qry_row[9], str(qry_row[8]), str(qry_row[1]), str(qry_row[2]), str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[6]), str(qry_row[7]))
 	
 console.print(qry_table)
-print()
+print("\f")
 
 # Defense Leaders by Sack
 
@@ -733,7 +782,7 @@ for top_40 in range(1, 41):
 		qry_table.add_row(str(top_40), qry_row[0], qry_row[9], str(qry_row[8]), str(qry_row[1]), str(qry_row[2]), str(qry_row[3]), str(qry_row[4]), str(qry_row[5]), str(qry_row[6]), str(qry_row[7]))
 	
 console.print(qry_table)
-print()
+print("\f")
 
 # Interceptions
 
@@ -757,5 +806,208 @@ for top_10 in range(1, 11):
 		qry_table.add_row(str(top_10), qry_row[0], qry_row[1], str(qry_row[2]), str(qry_row[3]), str(qry_row[4]))
 	
 console.print(qry_table)
+print("\f")
+
+# Team Ranking Reports
+
+print("TEAM RANKINGS")
+print()
+
+# By Off Pts/Gm
+
+print("By Offensive Points Per Game")
+
+qry_table = Table(box=None, header_style="default")
+qry_table.add_column("", justify="right")
+qry_table.add_column("")
+qry_table.add_column("", justify="right")
+
+qry = """SELECT full_name, ROUND(AVG(pts_for), 1) as pts_avg
+		FROM team_totals
+		GROUP BY team_abbr
+		ORDER BY pts_avg DESC"""
+qry_cursor.execute(qry)
+	
+team = 1
+for team_row in qry_cursor:
+	qry_table.add_row(str(team), team_row[0], str(team_row[1]))
+	team += 1
+
+console.print(qry_table)
+print()
+
+# By Def Pts/Gm
+
+print("By Defensive Points Per Game")
+
+qry_table = Table(box=None, header_style="default")
+qry_table.add_column("", justify="right")
+qry_table.add_column("")
+qry_table.add_column("", justify="right")
+
+qry = """SELECT full_name, ROUND(AVG(pts_against), 1) as pts_avg
+		FROM team_totals
+		GROUP BY team_abbr
+		ORDER BY pts_avg ASC"""
+qry_cursor.execute(qry)
+
+team = 1
+for team_row in qry_cursor:
+	qry_table.add_row(str(team), team_row[0], str(team_row[1]))
+	team += 1
+	
+console.print(qry_table)
+
+print("\f")
+
+# By Off Ttl/Yds Gm
+
+print("By Offensive Total Yards Per Game")
+
+qry_table = Table(box=None, header_style="default")
+qry_table.add_column("", justify="right")
+qry_table.add_column("")
+qry_table.add_column("", justify="right")
+
+qry = """SELECT full_name, ROUND(AVG(rushing_yds+passing_yds), 1) as ttl_yds
+		FROM team_totals
+		GROUP BY team_abbr
+		ORDER BY ttl_yds DESC"""
+qry_cursor.execute(qry)
+	
+team = 1
+for team_row in qry_cursor:
+	qry_table.add_row(str(team), team_row[0], str(team_row[1]))
+	team += 1
+
+console.print(qry_table)
+print()
+
+# By Def Ttl Yds/Gm
+
+print("By Defensive Total Yards Per Game")
+
+qry_table = Table(box=None, header_style="default")
+qry_table.add_column("", justify="right")
+qry_table.add_column("")
+qry_table.add_column("", justify="right")
+
+qry = """SELECT opponent_abbr, ROUND(AVG(rushing_yds+passing_yds), 1) as ttl_yds
+		FROM team_totals
+		GROUP BY opponent_abbr
+		ORDER BY ttl_yds ASC"""
+qry_cursor.execute(qry)
+
+team = 1
+for team_row in qry_cursor:
+	qry = "SELECT full_name FROM team_totals WHERE team_abbr = ? LIMIT 1"     # Have to query database for full name of defensive team
+	team_cursor.execute(qry, (team_row[0],))
+	oppo_row = team_cursor.fetchone()
+	qry_table.add_row(str(team), oppo_row[0], str(team_row[1]))
+	team += 1
+	
+console.print(qry_table)
+
+print("\f")
+
+# By Off Rush Yds/Gm
+
+print("By Offensive Rushing Yards Per Game")
+
+qry_table = Table(box=None, header_style="default")
+qry_table.add_column("", justify="right")
+qry_table.add_column("")
+qry_table.add_column("", justify="right")
+
+qry = """SELECT full_name, ROUND(AVG(rushing_yds), 1) as ttl_yds
+		FROM team_totals
+		GROUP BY team_abbr
+		ORDER BY ttl_yds DESC"""
+qry_cursor.execute(qry)
+	
+team = 1
+for team_row in qry_cursor:
+	qry_table.add_row(str(team), team_row[0], str(team_row[1]))
+	team += 1
+
+console.print(qry_table)
+print()
+
+# By Def Rush Yds/Gm
+
+print("By Defensive Rushing Yards Per Game")
+
+qry_table = Table(box=None, header_style="default")
+qry_table.add_column("", justify="right")
+qry_table.add_column("")
+qry_table.add_column("", justify="right")
+
+qry = """SELECT opponent_abbr, ROUND(AVG(rushing_yds), 1) as ttl_yds
+		FROM team_totals
+		GROUP BY opponent_abbr
+		ORDER BY ttl_yds ASC"""
+qry_cursor.execute(qry)
+
+team = 1
+for team_row in qry_cursor:
+	qry = "SELECT full_name FROM team_totals WHERE team_abbr = ? LIMIT 1"     # Have to query database for full name of defensive team
+	team_cursor.execute(qry, (team_row[0],))
+	oppo_row = team_cursor.fetchone()
+	qry_table.add_row(str(team), oppo_row[0], str(team_row[1]))
+	team += 1
+	
+console.print(qry_table)
+
+print("\f")
+
+# By Off Pass Yds/Gm
+
+print("By Offensive Passing Yards Per Game")
+
+qry_table = Table(box=None, header_style="default")
+qry_table.add_column("", justify="right")
+qry_table.add_column("")
+qry_table.add_column("", justify="right")
+
+qry = """SELECT full_name, ROUND(AVG(passing_yds), 1) as ttl_yds
+		FROM team_totals
+		GROUP BY team_abbr
+		ORDER BY ttl_yds DESC"""
+qry_cursor.execute(qry)
+	
+team = 1
+for team_row in qry_cursor:
+	qry_table.add_row(str(team), team_row[0], str(team_row[1]))
+	team += 1
+
+console.print(qry_table)
+print()
+
+# By Def Pass Yds/Gm
+
+print("By Defensive Passing Yards Per Game")
+
+qry_table = Table(box=None, header_style="default")
+qry_table.add_column("", justify="right")
+qry_table.add_column("")
+qry_table.add_column("", justify="right")
+
+qry = """SELECT opponent_abbr, ROUND(AVG(passing_yds), 1) as ttl_yds
+		FROM team_totals
+		GROUP BY opponent_abbr
+		ORDER BY ttl_yds ASC"""
+qry_cursor.execute(qry)
+
+team = 1
+for team_row in qry_cursor:
+	qry = "SELECT full_name FROM team_totals WHERE team_abbr = ? LIMIT 1"     # Have to query database for full name of defensive team
+	team_cursor.execute(qry, (team_row[0],))
+	oppo_row = team_cursor.fetchone()
+	qry_table.add_row(str(team), oppo_row[0], str(team_row[1]))
+	team += 1
+	
+console.print(qry_table)
+
+print("\f")
 
 db_conn.close()

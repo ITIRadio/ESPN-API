@@ -20,7 +20,9 @@ def NFL_post_game(game_number):
 	
 	try:                                      # Basic data
 		home = NFL_event_data_json['boxscore']['teams'][1]['team']['abbreviation']
+		home_full_name = NFL_event_data_json['boxscore']['teams'][1]['team']['displayName']
 		visitor = NFL_event_data_json['boxscore']['teams'][0]['team']['abbreviation']
+		visitor_full_name = NFL_event_data_json['boxscore']['teams'][0]['team']['displayName']
 		home_score = int(NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['score'])
 		visitor_score = int(NFL_data_json['events'][game_number]['competitions'][0]['competitors'][1]['score'])
 	except sqlite3.Error as err:              # If this fails, exit
@@ -115,22 +117,22 @@ def NFL_post_game(game_number):
 			home_winner = "L"
 			visitor_winner = "W"
 		
-		insert_query = "REPLACE INTO team_totals VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-		insert_data = (home, game_date, visitor, "H", home_winner, home_score, visitor_score, home_first_downs, home_rushing_attempts, home_rushing_yds, home_passing_completed, home_passing_attempted, home_passing_yds, home_total_yds, home_had_intercepted, home_fumbles_lost, home_sacked, home_sacked_yds, home_third_down_conversions_made, home_third_down_conversions_attempted, home_fourth_down_conversions_made, home_fourth_down_conversions_attempted, home_penalties, home_penalties_yds, home_red_zone_tds, home_red_zone_trips, home_total_plays, home_time_possession)
+		insert_query = "REPLACE INTO team_totals VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		insert_data = (home, home_full_name, game_date, visitor, "H", home_winner, home_score, visitor_score, home_first_downs, home_rushing_attempts, home_rushing_yds, home_passing_completed, home_passing_attempted, home_passing_yds, home_total_yds, home_had_intercepted, home_fumbles_lost, home_sacked, home_sacked_yds, home_third_down_conversions_made, home_third_down_conversions_attempted, home_fourth_down_conversions_made, home_fourth_down_conversions_attempted, home_penalties, home_penalties_yds, home_red_zone_tds, home_red_zone_trips, home_total_plays, home_time_possession)
 		
 		db_cursor.execute(insert_query, insert_data)
 		
-		insert_query = "REPLACE INTO team_totals VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-		insert_data = (visitor, game_date, home, "V", visitor_winner, visitor_score, home_score, visitor_first_downs, visitor_rushing_attempts, visitor_rushing_yds, visitor_passing_completed, visitor_passing_attempted, visitor_passing_yds, visitor_total_yds, visitor_had_intercepted, visitor_fumbles_lost, visitor_sacked, visitor_sacked_yds, visitor_third_down_conversions_made, visitor_third_down_conversions_attempted, visitor_fourth_down_conversions_made, visitor_fourth_down_conversions_attempted, visitor_penalties, visitor_penalties_yds, visitor_red_zone_tds, visitor_red_zone_trips, visitor_total_plays, visitor_time_possession)
+		insert_query = "REPLACE INTO team_totals VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+		insert_data = (visitor, visitor_full_name, game_date, home, "V", visitor_winner, visitor_score, home_score, visitor_first_downs, visitor_rushing_attempts, visitor_rushing_yds, visitor_passing_completed, visitor_passing_attempted, visitor_passing_yds, visitor_total_yds, visitor_had_intercepted, visitor_fumbles_lost, visitor_sacked, visitor_sacked_yds, visitor_third_down_conversions_made, visitor_third_down_conversions_attempted, visitor_fourth_down_conversions_made, visitor_fourth_down_conversions_attempted, visitor_penalties, visitor_penalties_yds, visitor_red_zone_tds, visitor_red_zone_trips, visitor_total_plays, visitor_time_possession)
 		
 		db_cursor.execute(insert_query, insert_data)
 		
-	except IndexError:
-		print(home, visitor, "Team stat API error")
+	except IndexError as idx_err:
+		print(home, visitor, "Team stat API error ", idx_err)
 	except sqlite3.Error as err:
-		print(home, visitor, "Team stat SQLite error")
+		print(home, visitor, "Team stat SQLite error ", err)
 
-
+	
 	for player in range(0, 3):      # Home passing Table
 		try:
 			player_id = NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['id']
@@ -487,6 +489,56 @@ def NFL_post_game(game_number):
 		except sqlite3.Error as err:
 			print(home, visitor, "Fumbles stat error: ", err)
 
+	forced_fumble_list = []   # Build forced fumble list from play by play, only add for defensive players
+	for drive in range(0,50):
+		try:
+			for plays in range(0,25):
+				try:
+					play_descr = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['text']    # Find Forced Fumbles
+					fumb_pos = play_descr.find("FUMBLES (", 0)
+					while fumb_pos != -1:
+						fumb_pos += 9
+						end_fumb_pos = play_descr.find(")", fumb_pos)
+						forced_fumble_list.append(play_descr[fumb_pos:end_fumb_pos])
+						fumb_pos = play_descr.find("FUMBLES (", end_fumb_pos)
+					
+					missed_fg_pos = play_descr.find("No Good")                       # Find missed FG & go ahead & add to db
+					if missed_fg_pos != -1:
+						missed_fg = play_descr[0:missed_fg_pos + 7]
+						qtr = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['period']['number']
+						play_time = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['clock']['displayValue']
+						team_abbr = NFL_event_data_json['drives']['previous'][drive]['team']['abbreviation']
+						if team_abbr == home:
+							home_visitor = "H"
+							opponent_abbr = visitor
+						else:
+							home_visitor = "V"
+							opponent_abbr = home
+						insert_query = "INSERT INTO scoring_plays VALUES (?, ?, ?, ?, ?, ?, ?)"
+						insert_data = (team_abbr, game_date, opponent_abbr, home_visitor, missed_fg, qtr, play_time)
+						db_cursor.execute(insert_query, insert_data)
+						
+				except IndexError:
+					continue
+		except IndexError:
+			continue
+
+	home_fumb_recovery = []   #Build fumble recoveries lists
+	for player in range(0, 10):
+		try:
+			if int(NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][2]) >= 1:
+				home_fumb_recovery.append(NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['athlete']['displayName'])
+		except IndexError:
+			continue
+	visitor_fumb_recovery = []
+	for player in range(0, 10):
+		try:
+			if int(NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][2]) >= 1:
+				visitor_fumb_recovery.append(NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['athlete']['displayName'])
+		except IndexError:
+			continue
+
+			
 	for player in range(0, 40):      # Home individual_defense Table
 		try:
 			player_id = NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['athlete']['id']
@@ -501,8 +553,13 @@ def NFL_post_game(game_number):
 			passes_defensed = int(NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][4])
 			qb_hits = int(NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][5])
 			tds = int(NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][6])
-			insert_query = "REPLACE INTO individual_defense VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-			insert_data = (player_id, display_name, team_abbr, game_date, opponent_abbr, home_visitor, tackles, solo, sacks, for_loss, passes_defensed, qb_hits, tds)
+
+			short_name = NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['athlete']['firstName'][0] + "." + NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['athlete']['lastName']
+			FF = forced_fumble_list.count(short_name)
+			FR = home_fumb_recovery.count(display_name)
+
+			insert_query = "REPLACE INTO individual_defense VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+			insert_data = (player_id, display_name, team_abbr, game_date, opponent_abbr, home_visitor, tackles, solo, sacks, for_loss, passes_defensed, qb_hits, tds, FF, FR)
 			db_cursor.execute(insert_query, insert_data)
 		except IndexError:
 			continue
@@ -523,37 +580,69 @@ def NFL_post_game(game_number):
 			passes_defensed = int(NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][4])
 			qb_hits = int(NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][5])
 			tds = int(NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][6])
-			insert_query = "REPLACE INTO individual_defense VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-			insert_data = (player_id, display_name, team_abbr, game_date, opponent_abbr, home_visitor, tackles, solo, sacks, for_loss, passes_defensed, qb_hits, tds)
+			
+			short_name = NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['athlete']['firstName'][0] + "." + NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['athlete']['lastName']
+			FF = forced_fumble_list.count(short_name)
+			FR = visitor_fumb_recovery.count(display_name)
+			
+			insert_query = "REPLACE INTO individual_defense VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+			insert_data = (player_id, display_name, team_abbr, game_date, opponent_abbr, home_visitor, tackles, solo, sacks, for_loss, passes_defensed, qb_hits, tds, FF, FR)
 			db_cursor.execute(insert_query, insert_data)
 		except IndexError:
 			continue
 		except sqlite3.Error as err:
 			print(home, visitor, "Individual defense stat error: ", err)
+			
+	for play in range(0,20):
+		try:
+			team_abbr = NFL_event_data_json['scoringPlays'][play]['team']['abbreviation']
+			play_descr = NFL_event_data_json['scoringPlays'][play]['text'].rstrip().lstrip()
+			qtr = str(NFL_event_data_json['scoringPlays'][play]['period']['number'])
+			play_time = NFL_event_data_json['scoringPlays'][play]['clock']['displayValue']
+			if team_abbr == home:
+				home_visitor = "H"
+				opponent_abbr = visitor
+			else:
+				home_visitor = "V"
+				opponent_abbr = home			
+			insert_query = "INSERT INTO scoring_plays VALUES (?, ?, ?, ?, ?, ?, ?)"
+			insert_data = (team_abbr, game_date, opponent_abbr, home_visitor, play_descr, qtr, play_time)
+			db_cursor.execute(insert_query, insert_data)
+		except IndexError:
+			continue
+		except sqlite3.Error as err:
+			print(home, visitor, "Scoring Plays error: ", err)
 
 	
 	try:
 		db_conn.commit()
 	except sqlite3.Error as err:   #If this fails, exit
-		print("Commit error: err")
+		print("Commit error")
 		if db_conn:
 			db_conn.close()
 		exit()
-	
+
 
 #Mainline
 
-if len(sys.argv) == 2:
+if len(sys.argv) == 3:
 	date_arg = str(sys.argv[1])
+	db_file_name = str(sys.argv[2])
 	url = "http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=" + date_arg + "-" + date_arg
 	try:
 		game_date = date_arg
 		datetime.strptime(game_date, "%Y%m%d")                 # Checks for valid date (strptime overwrites date itself within call)
 	except:
-		print("Incorrect date format, use YYYYMMDD format.")
+		print("Use command format: python3 -u ESPNNFLAPISqlite.py YYYYMMDD database_file_name.sqlite using one game day as a parameter and database must already exist.")
+		exit()
+	try:
+		db_conn = sqlite3.connect(db_file_name)
+		db_cursor = db_conn.cursor()
+	except sqlite3.Error as err:
+		print("Database doesn't exist or error in opening. Use command format: python3 -u ESPNNFLAPISqlite.py YYYYMMDD database_file_name.sqlite using one game day as a parameter and database must already exist.")
 		exit()
 else:
-	print("Enter one day as a parameter, YYYYMMDD.")
+	print("Use command format: python3 -u ESPNNFLAPISqlite.py YYYYMMDD database_file_name.sqlite using one game day as a parameter and database must already exist.")
 	exit()
 
 try:
@@ -563,13 +652,6 @@ except:
 	exit()
 
 NFL_data_json = json.loads(NFL_today.read())
-
-try:
-	db_conn = sqlite3.connect('NFLStats2025.db')
-	db_cursor = db_conn.cursor()
-except sqlite3.Error as err:
-	print("Database doesn't exist or error in opening")
-	exit()
 
 for game in range(0, 20):
 	try: 
