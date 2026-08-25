@@ -81,7 +81,7 @@ Two text-based reports are also available, ESPNNFLAPISqliteReport & ESPNNFLAPISq
 
 ### Rich library note
 
-Most of the Python libraries are included in most standard Python installs, however, double check & install if necessary. Rich will likely need to be installed in most cases, so use `pip install rich` on the regular command line ([Rich site](https://pypi.org/project/rich/)). If nagged about forced, unncessary "external management", use `sudo apt install python3-rich` (generally, `sudo apt install python3-{package-name}`).
+Most of the Python libraries are included in most standard Python installs, however, double check & install if necessary. Rich will likely need to be installed in most cases, so use `pip install rich` on the regular command line ([Rich site](https://pypi.org/project/rich/)). If nagged about forced, unnecessary "external management", use `sudo apt install python3-rich` (generally, `sudo apt install python3-{package-name}`).
 
 ### Football Database Notes
 
