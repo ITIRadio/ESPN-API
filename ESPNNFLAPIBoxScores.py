@@ -63,6 +63,67 @@ def NFL_post_game(game_number):
 	except:
 		team_stats = ""
 
+	#Build play-by-play (skip down & distance, often missing; also skipping start time of each play, included in most plays already)
+	
+	drives_plays = " Drives & Play-by-play:\n"
+	forced_fumble_list = []
+	missed_fg = " Missed Field Goals: "
+	
+	for drive in range(0,50):
+		try:
+			drives_plays = drives_plays + " " + NFL_event_data_json['drives']['previous'][drive]['team']['abbreviation'] + " Drive: " + NFL_event_data_json['drives']['previous'][drive]['description'] + ", " + NFL_event_data_json['drives']['previous'][drive]['displayResult'] + ":\n"
+			for plays in range(0,25):
+				try:
+					play_down_dist = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['start']['downDistanceText']
+				except:
+					play_down_dist = ""
+				try:
+					play_clock = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['clock']['displayValue']
+				except:
+					play_clock = ""
+				try:
+					play_qtr = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['period']['number']
+				except:
+					play_qtr = ""
+				if play_clock == "" or play_qtr == "":
+					if play_down_dist == "":
+						play_status = ""
+					else:
+						play_status = "(" + play_down_dist + ") "
+				else:
+					if play_down_dist == "":
+						play_status = "(" + play_clock + " - Qtr " + str(play_qtr) + ") "
+					else:
+						play_status = "(" + play_down_dist + ", " + play_clock + " - Qtr " + str(play_qtr) + ") "
+				try:
+					drives_plays = drives_plays + "   " + play_status + NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['text'] + "\n"
+					
+					# Only include FF & FR for players on the defensive player list, to include fumbles only involving the defense (for example, the offense falling on its own fumble gets a recovery counted, etc.); find keyword FUMBLES ( in description, add name in () to FF list; no - 1 end pos necessary
+					
+					play_descr = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['text']
+					fumb_pos = play_descr.find("FUMBLES (", 0)
+					while fumb_pos != -1:
+						fumb_pos += 9
+						end_fumb_pos = play_descr.find(")", fumb_pos)
+						forced_fumble_list.append(play_descr[fumb_pos:end_fumb_pos])
+						fumb_pos = play_descr.find("FUMBLES (", end_fumb_pos)
+					
+					#Missed FG add to list
+					missed_fg_pos = play_descr.find(" yard field goal is No Good")
+					if missed_fg_pos != -1:
+ 						missed_fg = missed_fg + play_descr[0:missed_fg_pos] + ", "
+					
+				except IndexError:
+					continue
+			drives_plays = drives_plays + "\n"
+
+		except (IndexError, KeyError) as api_bad_data_problem:  #Drive Result sometimes throws error, catch as additional exception, just skip as blank ok
+			continue
+	if drives_plays != " Drives & Play-by-play:\n":
+		drives_plays = drives_plays[:-2]           #Delete extra line feeds
+	else:
+		drives_plays = "No play-by-play data available."
+
 	home_passing = Table(box=None, header_style="default")
 	home_passing.add_column("Passing")
 	home_passing.add_column("Comp/Att", justify="right")
@@ -160,10 +221,13 @@ def NFL_post_game(game_number):
 		home_interceptions = home_interceptions[:-2]
 
 	home_fumbles = " Fumbles: "
+	home_fumb_recovery = []
 	for player in range(0, 10):
 		try:
-			if int(NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][0]) == 1:
+			if int(NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][0]) >= 1:
 				home_fumbles = home_fumbles + NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['athlete']['displayName'] + " " + NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][0] + " Fumbles, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][1] + " Fumbles Lost; "
+			if int(NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][2]) >= 1:
+				home_fumb_recovery.append(NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['athlete']['displayName'])
 		except IndexError:
 			continue
 	if home_fumbles == " Fumbles: ":
@@ -181,9 +245,15 @@ def NFL_post_game(game_number):
 		home_def_stats.add_column("PD", justify="right")
 		home_def_stats.add_column("QB Hit", justify="right")
 		home_def_stats.add_column("TDs", justify="right")
+		home_def_stats.add_column("FF", justify="right")
+		home_def_stats.add_column("FR", justify="right")
 		for player in range (0, 50):
 			try:
-				home_def_stats.add_row(NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['athlete']['displayName'], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][0], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][1], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][2], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][3], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][4], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][5], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][6])
+				full_name = NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['athlete']['displayName']
+				short_name = NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['athlete']['firstName'][0] + "." + NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['athlete']['lastName']
+				FF = forced_fumble_list.count(short_name)
+				FR = home_fumb_recovery.count(full_name)
+				home_def_stats.add_row(NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['athlete']['displayName'], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][0], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][1], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][2], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][3], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][4], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][5], NFL_event_data_json['boxscore']['players'][1]['statistics'][4]['athletes'][player]['stats'][6], str(FF), str(FR))
 			except IndexError:
 				continue
 	except:
@@ -286,10 +356,13 @@ def NFL_post_game(game_number):
 		visitor_interceptions = visitor_interceptions[:-2]
 
 	visitor_fumbles = " Fumbles: "
+	visitor_fumb_recovery = []
 	for player in range(0, 10):
 		try:
-			if int(NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][0]) == 1:
+			if int(NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][0]) >= 1:
 				visitor_fumbles = visitor_fumbles + NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['athlete']['displayName'] + " " + NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][0] + " Fumbles, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][1] + " Fumbles Lost; "
+			if int(NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][2]) >= 1:
+				visitor_fumb_recovery.append(NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['athlete']['displayName'])
 		except IndexError:
 			continue
 	if visitor_fumbles == " Fumbles: ":
@@ -307,9 +380,15 @@ def NFL_post_game(game_number):
 		visitor_def_stats.add_column("PD", justify="right")
 		visitor_def_stats.add_column("QB Hit", justify="right")
 		visitor_def_stats.add_column("TDs", justify="right")
+		visitor_def_stats.add_column("FF", justify="right")
+		visitor_def_stats.add_column("FR", justify="right")
 		for player in range (0, 50):
 			try:
-				visitor_def_stats.add_row(NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['athlete']['displayName'], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][0], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][1], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][2], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][3], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][4], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][5], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][6])
+				full_name = NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['athlete']['displayName']
+				short_name = NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['athlete']['firstName'][0] + "." + NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['athlete']['lastName']
+				FF = forced_fumble_list.count(short_name)
+				FR = visitor_fumb_recovery.count(full_name)
+				visitor_def_stats.add_row(NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['athlete']['displayName'], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][0], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][1], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][2], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][3], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][4], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][5], NFL_event_data_json['boxscore']['players'][0]['statistics'][4]['athletes'][player]['stats'][6], str(FF), str(FR))
 			except IndexError:
 				continue
 	except:
@@ -351,53 +430,6 @@ def NFL_post_game(game_number):
 			continue
 	if scoring_plays != "Scoring Plays:\n":
 		scoring_plays = scoring_plays[:-2]
-	
-	#Build play-by-play (skip down & distance, often missing; also skipping start time of each play, included in most plays already)
-	
-	drives_plays = " Drives & Play-by-play:\n"
-	for drive in range(0,50):
-		try:
-			drives_plays = drives_plays + " " + NFL_event_data_json['drives']['previous'][drive]['team']['abbreviation'] + " Drive: " + NFL_event_data_json['drives']['previous'][drive]['description'] + ", " + NFL_event_data_json['drives']['previous'][drive]['displayResult'] + ":\n"
-			for plays in range(0,25):
-				try:
-					play_down_dist = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['start']['downDistanceText']
-				except:
-					play_down_dist = ""
-				try:
-					play_clock = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['clock']['displayValue']
-				except:
-					play_clock = ""
-				try:
-					play_qtr = NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['period']['number']
-				except:
-					play_qtr = ""
-				if play_clock == "" or play_qtr == "":
-					if play_down_dist == "":
-						play_status = ""
-					else:
-						play_status = "(" + play_down_dist + ") "
-				else:
-					if play_down_dist == "":
-						play_status = "(" + play_clock + " - Qtr " + str(play_qtr) + ") "
-					else:
-						play_status = "(" + play_down_dist + ", " + play_clock + " - Qtr " + str(play_qtr) + ") "
-				try:
-					drives_plays = drives_plays + "   " + play_status + NFL_event_data_json['drives']['previous'][drive]['plays'][plays]['text'] + "\n"
-				except IndexError:
-					continue
-			drives_plays = drives_plays + "\n"
-			#clock/down dist only avail nfl; 2 plays together on no play ok?, cmt ok, dbg prt at top, qtr int to str nec, spc not tab thn clr stg?
-			#leave tmout occa at end of drv, spc'g thk ok
-			#can't use continue in other tries, drops out of for, specific for IdxErr
-			#No scoring plays in progress this version (need exception for all err); score_by_qtrs make into table, tabs no good, 1 ot enuf continue?
-			#Rid cmt, oth enuf, cmt here, pyth dump or carry/del fut; in this version in prog enuf
-			#scrbd call, no provide date, regular dump; full team name nec individ stat hdr, not NFL_event_data_json['boxscore']['teams'][1]['team']['location']
-		except (IndexError, KeyError) as api_bad_data_problem:  #Drive Result sometimes throws error, catch as additional exception, just skip as blank ok
-			continue
-	if drives_plays != " Drives & Play-by-play:\n":
-		drives_plays = drives_plays[:-2]           #Delete extra line feeds
-	else:
-		drives_plays = "No play-by-play data available."
 
 	try:
 		article = NFL_event_data_json['article']['story']
@@ -461,6 +493,10 @@ def NFL_post_game(game_number):
 	print()
 	if scoring_plays != "Scoring Plays:\n":
 		print(scoring_plays)
+	if missed_fg != " Missed Field Goals: ":
+		missed_fg = missed_fg[:-2]
+		print()
+		print(missed_fg)
 	print()
 	print(" " + visitor + " Individual Stats:")
 	console.print(visitor_passing)
@@ -613,7 +649,7 @@ def NFL_in_progress(game_number):
 	
 	#Print game header, team, scores, etc.
 	
-	print(visitor, "("+visitor_record+") " + str(visitor_timeouts) + " T/O   "+visitor_add_spc, visitor_score)    # str() nec b/c +'s with numbers
+	print(visitor, "("+visitor_record+") " + str(visitor_timeouts) + " T/O   "+visitor_add_spc, visitor_score)    
 	print(home, "("+home_record+") "+str(home_timeouts)+" T/O   "+home_add_spc, home_score)
 	if down_distance_ball_on != "":
 		print (" "+down_distance_ball_on)
@@ -812,5 +848,4 @@ for game in range(0, 20):
 		else:
 			NFL_pre_game(game)
 	except IndexError:
-
 		continue
