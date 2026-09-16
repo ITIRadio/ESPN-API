@@ -59,32 +59,44 @@ def CFB_post_game(game_number):
 	
 	#Build all player stats
 	
-	home_passing = " Passing: "
+	home_passing = Table(box=None, header_style="default")
+	home_passing.add_column("Passing")
+	home_passing.add_column("Comp/Att", justify="right")
+	home_passing.add_column("Yds", justify="right")
+	home_passing.add_column("TD", justify="right")
+	home_passing.add_column("Int", justify="right")
+	
 	for player in range(0, 3):
 		try:
-			home_passing = home_passing + CFB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['displayName'] + " " + CFB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][0] + ", " + CFB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][1] + " Yds, " + CFB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][3] + " TD, " + CFB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][4] + " Int, "
+			home_passing.add_row (CFB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['displayName'], CFB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][0], str(CFB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][1]), str(CFB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][3]), str(CFB_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][4]))
 		except IndexError:
 			continue
-	if home_passing != " Passing: ":
-		home_passing = home_passing[:-2]
 	
-	home_rushing = " Rushing: "
+	home_rushing = Table(box=None, header_style="default")
+	home_rushing.add_column("Rushing")
+	home_rushing.add_column("Carries", justify="right")
+	home_rushing.add_column("Yds", justify="right")
+	home_rushing.add_column("TD", justify="right")
+	home_rushing.add_column("Long", justify="right")
+	
 	for player in range(0, 7):
 		try:
-			home_rushing = home_rushing + CFB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['athlete']['displayName'] + " " + CFB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][0] + " Carries, " + CFB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][1] + " Yds, " + CFB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][3] + " TD, " + CFB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][4] + " Long, "  
+			home_rushing.add_row(CFB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['athlete']['displayName'].strip(), str(CFB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][0]), str(CFB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][1]), str(CFB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][3]), str(CFB_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][4]))
 		except IndexError:
 			continue
-	if home_rushing != " Rushing: ":
-		home_rushing = home_rushing[:-2]
 	
-	home_receiving = " Receiving: "
+	home_receiving = Table(box=None, header_style="default")
+	home_receiving.add_column("Receiving")
+	home_receiving.add_column("Rec", justify="right")
+	home_receiving.add_column("Yds", justify="right")
+	home_receiving.add_column("TD", justify="right")
+	home_receiving.add_column("Long", justify="right")
+	
 	for player in range(0, 10):
 		try:
-			home_receiving = home_receiving + CFB_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['athlete']['displayName'] + " " + CFB_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][0] + " Receptions, " + CFB_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][1] + " Yds, " + CFB_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][3] + " TD, " + CFB_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][4] + " Long, "
+			home_receiving.add_row(CFB_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['athlete']['displayName'], str(CFB_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][0]), str(CFB_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][1]), str(CFB_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][3]), str(CFB_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][4]))
 		except IndexError:
 			continue
-	if home_receiving != " Receiving: ":
-		home_receiving = home_receiving[:-2]
 
 	home_punting = " Punting: "
 	for player in range(0, 10):
@@ -148,32 +160,44 @@ def CFB_post_game(game_number):
 	except:
 		home_def_stats = ""
 
-	visitor_passing = " Passing: "
+	visitor_passing = Table(box=None, header_style="default")
+	visitor_passing.add_column("Passing")
+	visitor_passing.add_column("Comp/Att", justify="right")
+	visitor_passing.add_column("Yds", justify="right")
+	visitor_passing.add_column("TD", justify="right")
+	visitor_passing.add_column("Int", justify="right")
+	
 	for player in range(0, 3):
 		try:
-			visitor_passing = visitor_passing + CFB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['displayName'] + " " + CFB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][0] + ", " + CFB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][1] + " Yds, " + CFB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][3] + " TD, " + CFB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][4] + " Int, "
+			visitor_passing.add_row (CFB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['displayName'], CFB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][0], str(CFB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][1]), str(CFB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][3]), str(CFB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][4]))
 		except IndexError:
 			continue
-	if visitor_passing != " Passing: ":
-		visitor_passing = visitor_passing[:-2]
 	
-	visitor_rushing = " Rushing: "
+	visitor_rushing = Table(box=None, header_style="default")
+	visitor_rushing.add_column("Rushing")
+	visitor_rushing.add_column("Carries", justify="right")
+	visitor_rushing.add_column("Yds", justify="right")
+	visitor_rushing.add_column("TD", justify="right")
+	visitor_rushing.add_column("Long", justify="right")
+	
 	for player in range(0, 7):
 		try:
-			visitor_rushing = visitor_rushing + CFB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['athlete']['displayName'] + " " + CFB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][0] + " Carries, " + CFB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][1] + " Yds, " + CFB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][3] + " TD, " + CFB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][4] + " Long, "  
+			visitor_rushing.add_row(CFB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['athlete']['displayName'].strip(), str(CFB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][0]), str(CFB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][1]), str(CFB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][3]), str(CFB_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][4]))
 		except IndexError:
 			continue
-	if visitor_rushing != " Rushing: ":
-		visitor_rushing = visitor_rushing[:-2]
 	
-	visitor_receiving = " Receiving: "
+	visitor_receiving = Table(box=None, header_style="default")
+	visitor_receiving.add_column("Receiving")
+	visitor_receiving.add_column("Rec", justify="right")
+	visitor_receiving.add_column("Yds", justify="right")
+	visitor_receiving.add_column("TD", justify="right")
+	visitor_receiving.add_column("Long", justify="right")
+	
 	for player in range(0, 10):
 		try:
-			visitor_receiving = visitor_receiving + CFB_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['athlete']['displayName'] + " " + CFB_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][0] + " Receptions, " + CFB_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][1] + " Yds, " + CFB_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][3] + " TD, " + CFB_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][4] + " Long, "
+			visitor_receiving.add_row(CFB_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['athlete']['displayName'], str(CFB_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][0]), str(CFB_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][1]), str(CFB_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][3]), str(CFB_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][4]))
 		except IndexError:
 			continue
-	if visitor_receiving != " Receiving: ":
-		visitor_receiving = visitor_receiving[:-2]
 
 	visitor_punting = " Punting: "
 	for player in range(0, 10):
@@ -375,9 +399,13 @@ def CFB_post_game(game_number):
 		print(scoring_plays)
 	print()
 	print(" " + CFB_event_data_json['boxscore']['teams'][0]['team']['abbreviation'] + " Individual Stats:")
-	print(visitor_passing)
-	print(visitor_rushing)
-	print(visitor_receiving)
+	print()
+	console.print(visitor_passing)
+	print()
+	console.print(visitor_rushing)
+	print()
+	console.print(visitor_receiving)
+	print()
 	print(visitor_punting)
 	print(visitor_punt_return)
 	print(visitor_kick_return)
@@ -386,9 +414,13 @@ def CFB_post_game(game_number):
 	console.print(visitor_def_stats)
 	print()
 	print(" " + CFB_event_data_json['boxscore']['teams'][1]['team']['abbreviation'] + " Individual Stats:")
-	print(home_passing)
-	print(home_rushing)
-	print(home_receiving)
+	print()
+	console.print(home_passing)
+	print()
+	console.print(home_rushing)
+	print()
+	console.print(home_receiving)
+	print()
 	print(home_punting)
 	print(home_punt_return)
 	print(home_kick_return)
@@ -401,11 +433,10 @@ def CFB_post_game(game_number):
 		print()
 	print(drives_plays)
 	print("----------------------------------------------------------------------")
-	print()
 
 def CFB_in_progress(game_number):
 	
-	#Make event call for current game, game_number is parm passed into def; in prog, old fmt here ok
+	#Make event call for current game, game_number is parm passed into def
 	
 	url_event = "http://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=" + CFB_data_json['events'][game_number]['id']
 	CFB_event = urlopen(url_event)
@@ -413,9 +444,28 @@ def CFB_in_progress(game_number):
 	
 	#Build home & visiting team stat lines, plus team in possession & drive stats
 	
+	console = Console()
+	
 	try:
-		home_team_stats = " " + CFB_event_data_json['boxscore']['teams'][1]['team']['abbreviation'] + ": " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue'] + " " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][0]['label'] + ", " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][8]['displayValue'] + "-" + CFB_event_data_json['boxscore']['teams'][1]['statistics'][7]['displayValue'] + " Rushing, " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][5]['displayValue'] + ", " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][4]['displayValue'] + " Yds Passing, " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue'] + " Total Yds, " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][13]['displayValue'] + " Int, " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][12]['displayValue'] + " Fum Lost, " + "\n " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][1]['displayValue'] + " 3rd Downs, " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][2]['displayValue'] + " 4th Downs, " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][10]['displayValue'] + " Penalties, " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][14]['displayValue'] + " Possession"
-		visitor_team_stats = " " + CFB_event_data_json['boxscore']['teams'][0]['team']['abbreviation'] + ": " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue'] + " " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][0]['label'] + ", " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][8]['displayValue'] + "-" + CFB_event_data_json['boxscore']['teams'][0]['statistics'][7]['displayValue'] + " Rushing, " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][5]['displayValue'] + ", " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][4]['displayValue'] + " Yds Passing, " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue'] + " Total Yds, " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][13]['displayValue'] + " Int, " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][12]['displayValue'] + " Fum Lost, " + "\n " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][1]['displayValue'] + " 3rd Downs, " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][2]['displayValue'] + " 4th Downs, " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][10]['displayValue'] + " Penalties, " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][14]['displayValue'] + " Possession"
+		team_stats = Table(box=None, header_style="default")
+		team_stats.add_column("")
+		team_stats.add_column(CFB_event_data_json['boxscore']['teams'][0]['team']['abbreviation'], justify="right")
+		team_stats.add_column(CFB_event_data_json['boxscore']['teams'][1]['team']['abbreviation'], justify="right")
+		team_stats.add_row("1st Downs", CFB_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue'])
+		team_stats.add_row("Rushing", CFB_event_data_json['boxscore']['teams'][0]['statistics'][8]['displayValue'] + "-" + CFB_event_data_json['boxscore']['teams'][0]['statistics'][7]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][8]['displayValue'] + "-" + CFB_event_data_json['boxscore']['teams'][1]['statistics'][7]['displayValue'])
+		team_stats.add_row("Passing", CFB_event_data_json['boxscore']['teams'][0]['statistics'][5]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][5]['displayValue'])
+		team_stats.add_row("Passing Yds", CFB_event_data_json['boxscore']['teams'][0]['statistics'][4]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][4]['displayValue'])
+		team_stats.add_row("Total Yds", CFB_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue'])
+		team_stats.add_row("Had Intercepted", CFB_event_data_json['boxscore']['teams'][0]['statistics'][13]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][13]['displayValue'])
+		team_stats.add_row("Fumbles Lost", CFB_event_data_json['boxscore']['teams'][0]['statistics'][12]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][12]['displayValue'])
+		team_stats.add_row("3rd Down Conversions", CFB_event_data_json['boxscore']['teams'][0]['statistics'][1]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][1]['displayValue'])
+		team_stats.add_row("4th Down Conversions", CFB_event_data_json['boxscore']['teams'][0]['statistics'][2]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][2]['displayValue'])
+		team_stats.add_row("Penalties", CFB_event_data_json['boxscore']['teams'][0]['statistics'][10]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][10]['displayValue'])
+		team_stats.add_row("Time of Possession", CFB_event_data_json['boxscore']['teams'][0]['statistics'][14]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][14]['displayValue'])
+	except:
+		team_stats = ""
+	
+	try:
 		current_drive = CFB_event_data_json['drives']['current']['description']
 		current_drive_possession = CFB_event_data_json['drives']['current']['team']['abbreviation']
 	except:
@@ -480,6 +530,15 @@ def CFB_in_progress(game_number):
 	if visitor_receiving != " Receiving: ":
 		visitor_receiving = visitor_receiving[:-2]
 
+	scoring_plays = " Scoring Plays:\n "
+	for play in range(0,20):
+		try:
+			scoring_plays = scoring_plays + CFB_event_data_json['scoringPlays'][play]['team']['abbreviation'] + ": " + CFB_event_data_json['scoringPlays'][play]['text'].rstrip().lstrip() + ", Qtr " + str(CFB_event_data_json['scoringPlays'][play]['period']['number']) + ", " + CFB_event_data_json['scoringPlays'][play]['clock']['displayValue'] + "\n "
+		except:                                   #If no scoring plays yet, IndexError exception doesn't kick off, get error instead on last def/ln nbr
+			continue
+	if scoring_plays != " Scoring Plays:\n ":      
+		scoring_plays = scoring_plays[:-2]
+
 	#Build basic game info, stadium, teams, record, score, last play, timeouts, down & distance, time remaining if available
 
 	stadium = CFB_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
@@ -491,7 +550,7 @@ def CFB_in_progress(game_number):
 	visitor_score = CFB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['score']
 	try:
 		last_play = CFB_data_json['events'][game_number]['competitions'][0]['situation']['lastPlay']['text']
-		home_timeouts = CFB_data_json['events'][game_number]['competitions'][0]['situation']['homeTimeouts']
+		home_timeouts = CFB_data_json['events'][game_number]['competitions'][0]['situation']['homeTimeouts']           #T/O's fixed CFB only?
 		visitor_timeouts = CFB_data_json['events'][game_number]['competitions'][0]['situation']['awayTimeouts']
 	except:
 		last_play = ""
@@ -523,6 +582,10 @@ def CFB_in_progress(game_number):
 	else:
 		visitor_rank = ", #"+str(visitor_rank)
 	try:
+		broadcast = CFB_data_json['events'][game_number]['competitions'][0]['broadcasts'][0]['names'][0]
+	except:
+		broadcast = ""
+	try:
 		visitor_conf_record = CFB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['records'][3]['summary']
 	except:
 		visitor_conf_record = "0-0"
@@ -544,8 +607,8 @@ def CFB_in_progress(game_number):
 	
 	#Print game header, team, scores, etc.
 	
-	print(visitor, "("+visitor_record+", "+visitor_conf_record+visitor_rank+") " + str(visitor_timeouts) + " T/O   "+visitor_add_spc, visitor_score)    # str() nec b/c +'s with numbers
-	print(home, "("+home_record+", "+home_conf_record+home_rank+") "+str(home_timeouts)+" T/O   "+home_add_spc, home_score)
+	print(visitor, "("+visitor_record+", "+visitor_conf_record+visitor_rank+") " + str(visitor_timeouts) + " T/O   "+visitor_add_spc, visitor_score)
+	print(home, "("+home_record+", "+home_conf_record+home_rank+") "+str(home_timeouts)+" T/O   "+home_add_spc, home_score, stadium, broadcast)
 	if down_distance_ball_on != "":
 		print (" "+down_distance_ball_on)
 	print(" "+game_status, "\n", current_drive_possession+" Ball: "+current_drive, "\n", last_play)
@@ -553,20 +616,27 @@ def CFB_in_progress(game_number):
 		print(" " + notes)
 
 	#Print game stats as available
-	
-	if visitor_team_stats != "":
+
+	if team_stats != "":       #Early in game if no stats available
 		print()
-		print(visitor_team_stats)
+		console.print(team_stats)
+		print()
+	
+	print(" " + CFB_event_data_json['boxscore']['teams'][0]['team']['abbreviation'] + " Individual Stats:")
 	print(visitor_passing)
 	print(visitor_rushing)
 	print(visitor_receiving)
-	if home_team_stats != "":
-		print()
-		print(home_team_stats)
+	print()
+	print(" " + CFB_event_data_json['boxscore']['teams'][1]['team']['abbreviation'] + " Individual Stats:")
 	print(home_passing)
 	print(home_rushing)
 	print(home_receiving)
 	print()
+	
+	if scoring_plays != " Scoring Plays:\n ":
+		print(scoring_plays)
+
+	print("------------------------------------------------------------------------")
 
 def CFB_pre_game(game_number):
 	
@@ -575,12 +645,14 @@ def CFB_pre_game(game_number):
 	#Some games have to show brief preview from scoreboard call b/c event URL doesn't exist yet
 	
 	#Build basic game info, stadium, teams, record, weather, broadcast network, odds, over/under if available
-	
+
+	url_event = "http://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=" + CFB_data_json['events'][game_number]['id']
+
+	console = Console()
+
 	stadium = CFB_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
 	home = CFB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
-	
 	visitor = CFB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['displayName']
-	
 	game_status = CFB_data_json['events'][game_number]['status']['type']['detail']
 	try:
 		home_record = CFB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['records'][0]['summary']
@@ -632,46 +704,14 @@ def CFB_pre_game(game_number):
 		notes = CFB_data_json['events'][game_number]['competitions'][0]['notes'][0]['headline']
 	except:
 		notes = ""
+
+	#Load event json here
 		
-	#Build visiting & home team stat averages, rest of data from event call
-	
-	url_event = "http://site.api.espn.com/apis/site/v2/sports/football/college-football/summary?event=" + CFB_data_json['events'][game_number]['id']
-	
 	try:
 		CFB_event = urlopen(url_event)
 		CFB_event_data_json = json.loads(CFB_event.read())
 	
-		try:
-			visitor_stats = " " + CFB_event_data_json['boxscore']['teams'][0]['team']['abbreviation'] + " Stats: "
-		except:
-			visitor_stats = ""
-
-		for stat in range(0, 10):
-			try:
-				visitor_stats = visitor_stats + CFB_event_data_json['boxscore']['teams'][0]['statistics'][stat]['displayValue'] + " " + CFB_event_data_json['boxscore']['teams'][0]['statistics'][stat]['label'] + ", "
-			except IndexError:
-				pass
-		if visitor_stats != " " + CFB_event_data_json['boxscore']['teams'][0]['team']['abbreviation'] + " Stats: ":
-			visitor_stats = visitor_stats[:-2]
-		else:                                              
-			visitor_stats = " " + CFB_event_data_json['boxscore']['teams'][0]['team']['abbreviation'] + " Stats: "
-
-		try:
-			home_stats = " " + CFB_event_data_json['boxscore']['teams'][1]['team']['abbreviation'] + " Stats: "
-		except:
-			home_stats = ""
-
-		for stat in range(0, 10):
-			try:
-				home_stats = home_stats + CFB_event_data_json['boxscore']['teams'][1]['statistics'][stat]['displayValue'] + " " + CFB_event_data_json['boxscore']['teams'][1]['statistics'][stat]['label'] + ", "
-			except IndexError:
-				pass
-		if home_stats != " " + CFB_event_data_json['boxscore']['teams'][1]['team']['abbreviation'] + " Stats: ":
-			home_stats = home_stats[:-2]
-		else:
-			home_stats = " " + CFB_event_data_json['boxscore']['teams'][1]['team']['abbreviation'] + " Stats: "
-	
-		#Build visiting & home stat player leaders
+	#Build visiting & home stat player leaders
 
 		visitor_leaders = " "
 		try:
@@ -684,37 +724,49 @@ def CFB_pre_game(game_number):
 			home_leaders = home_leaders + CFB_event_data_json['leaders'][0]['leaders'][0]['leaders'][0]['athlete']['fullName'] + " " + CFB_event_data_json['leaders'][0]['leaders'][0]['leaders'][0]['displayValue'] + ", " + CFB_event_data_json['leaders'][0]['leaders'][1]['leaders'][0]['athlete']['fullName'] + " " + CFB_event_data_json['leaders'][0]['leaders'][1]['leaders'][0]['displayValue'] + ", " + CFB_event_data_json['leaders'][0]['leaders'][2]['leaders'][0]['athlete']['fullName'] + " " + CFB_event_data_json['leaders'][0]['leaders'][2]['leaders'][0]['displayValue']
 		except:
 			pass
-	
-		#Build last 5 game results for both teams, most recent listed last
-	
-		home_previous_games = " Previous Games: "  #Last 5 games; for some Pythonic reason, the for loop stops 1 game too soon if range (0,4), even though the indices are in the range(0,4)?!
-		for game in range(0,5):
-			try:
-				home_previous_games = home_previous_games + CFB_event_data_json['lastFiveGames'][0]['events'][game]['atVs'] + " " + CFB_event_data_json['lastFiveGames'][0]['events'][game]['opponent']['abbreviation'] + " " + CFB_event_data_json['lastFiveGames'][0]['events'][game]['gameResult'] + " " + CFB_event_data_json['lastFiveGames'][0]['events'][game]['score']
-				home_previous_games = home_previous_games[:-1] + ", "
-			except IndexError:
-				continue
-		if home_previous_games != " Previous Games: ":
-			home_previous_games = home_previous_games[:-2]
-
-		visitor_previous_games = " Previous Games: "
-		for game in range(0,5):
-			try:
-				visitor_previous_games = visitor_previous_games + CFB_event_data_json['lastFiveGames'][1]['events'][game]['atVs'] + " " + CFB_event_data_json['lastFiveGames'][1]['events'][game]['opponent']['abbreviation'] + " " + CFB_event_data_json['lastFiveGames'][1]['events'][game]['gameResult'] + " " + CFB_event_data_json['lastFiveGames'][1]['events'][game]['score']
-				visitor_previous_games = visitor_previous_games[:-1] + ", "
-			except IndexError:
-				continue
-		if visitor_previous_games != " Previous Games: ":
-			visitor_previous_games = visitor_previous_games[:-2]
 
 	# Except for dead event URL, leave blank b/c data doesn't exist
 	except:
-		visitor_stats = ""
 		visitor_leaders = " "
-		visitor_previous_games = " Previous Games: "
-		home_stats = ""
 		home_leaders = " "
-		home_previous_games = " Previous Games: "
+
+	#Build visiting & home team stat averages
+	
+	try:
+		team_stats = Table(box=None, header_style="default")
+		team_stats.add_column("Stat Matchup")
+		team_stats.add_column(CFB_event_data_json['boxscore']['teams'][0]['team']['abbreviation'], justify="right")
+		team_stats.add_column(CFB_event_data_json['boxscore']['teams'][1]['team']['abbreviation'], justify="right")
+		team_stats.add_row("Points Per Game", CFB_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue'])
+		team_stats.add_row("Total Yards Per Game",  CFB_event_data_json['boxscore']['teams'][0]['statistics'][1]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][1]['displayValue'])
+		team_stats.add_row("Yards Passing Per Game",  CFB_event_data_json['boxscore']['teams'][0]['statistics'][2]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][2]['displayValue'])
+		team_stats.add_row("Yards Rushing Per Game",  CFB_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue'])
+		team_stats.add_row("Points Allowed Per Game",  CFB_event_data_json['boxscore']['teams'][0]['statistics'][4]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][4]['displayValue'])
+		team_stats.add_row("Total Allowed Yards Per Game",  CFB_event_data_json['boxscore']['teams'][0]['statistics'][5]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][5]['displayValue'])
+		team_stats.add_row("Yards Passing Allowed Per Game",  CFB_event_data_json['boxscore']['teams'][0]['statistics'][6]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][6]['displayValue'])
+		team_stats.add_row("Yards Rushing Allowed Per Game",  CFB_event_data_json['boxscore']['teams'][0]['statistics'][7]['displayValue'], CFB_event_data_json['boxscore']['teams'][1]['statistics'][7]['displayValue'])
+	except:
+		team_stats = ""
+
+	# Build Previous Games Table
+	
+	try:
+		previous_games = Table(box=None, header_style="default")
+		previous_games.add_column(CFB_event_data_json['boxscore']['teams'][0]['team']['abbreviation'], justify="left")
+		previous_games.add_column("", justify="left")
+		previous_games.add_column("", justify="left")
+		previous_games.add_column("", justify="left")
+		previous_games.add_column(CFB_event_data_json['boxscore']['teams'][1]['team']['abbreviation'], justify="left")
+		previous_games.add_column("", justify="left")
+		previous_games.add_column("", justify="left")
+		previous_games.add_column("", justify="left")
+		previous_games.add_row(CFB_event_data_json['lastFiveGames'][1]['events'][4]['gameDate'][5:10], CFB_event_data_json['lastFiveGames'][1]['events'][4]['atVs'] + " " + CFB_event_data_json['lastFiveGames'][1]['events'][4]['opponent']['abbreviation'], CFB_event_data_json['lastFiveGames'][1]['events'][4]['gameResult'], CFB_event_data_json['lastFiveGames'][1]['events'][4]['score'], CFB_event_data_json['lastFiveGames'][1]['events'][4]['gameDate'][5:10], CFB_event_data_json['lastFiveGames'][0]['events'][4]['atVs'] + " " + CFB_event_data_json['lastFiveGames'][0]['events'][4]['opponent']['abbreviation'], CFB_event_data_json['lastFiveGames'][0]['events'][4]['gameResult'], CFB_event_data_json['lastFiveGames'][0]['events'][4]['score'])
+		previous_games.add_row(CFB_event_data_json['lastFiveGames'][1]['events'][3]['gameDate'][5:10], CFB_event_data_json['lastFiveGames'][1]['events'][3]['atVs'] + " " + CFB_event_data_json['lastFiveGames'][1]['events'][3]['opponent']['abbreviation'], CFB_event_data_json['lastFiveGames'][1]['events'][3]['gameResult'], CFB_event_data_json['lastFiveGames'][1]['events'][3]['score'], CFB_event_data_json['lastFiveGames'][1]['events'][3]['gameDate'][5:10], CFB_event_data_json['lastFiveGames'][0]['events'][3]['atVs'] + " " + CFB_event_data_json['lastFiveGames'][0]['events'][3]['opponent']['abbreviation'], CFB_event_data_json['lastFiveGames'][0]['events'][3]['gameResult'], CFB_event_data_json['lastFiveGames'][0]['events'][3]['score'])
+		previous_games.add_row(CFB_event_data_json['lastFiveGames'][1]['events'][2]['gameDate'][5:10], CFB_event_data_json['lastFiveGames'][1]['events'][2]['atVs'] + " " + CFB_event_data_json['lastFiveGames'][1]['events'][2]['opponent']['abbreviation'], CFB_event_data_json['lastFiveGames'][1]['events'][2]['gameResult'], CFB_event_data_json['lastFiveGames'][1]['events'][2]['score'], CFB_event_data_json['lastFiveGames'][1]['events'][2]['gameDate'][5:10], CFB_event_data_json['lastFiveGames'][0]['events'][2]['atVs'] + " " + CFB_event_data_json['lastFiveGames'][0]['events'][2]['opponent']['abbreviation'], CFB_event_data_json['lastFiveGames'][0]['events'][2]['gameResult'], CFB_event_data_json['lastFiveGames'][0]['events'][2]['score'])
+		previous_games.add_row(CFB_event_data_json['lastFiveGames'][1]['events'][1]['gameDate'][5:10], CFB_event_data_json['lastFiveGames'][1]['events'][1]['atVs'] + " " + CFB_event_data_json['lastFiveGames'][1]['events'][1]['opponent']['abbreviation'], CFB_event_data_json['lastFiveGames'][1]['events'][1]['gameResult'], CFB_event_data_json['lastFiveGames'][1]['events'][1]['score'], CFB_event_data_json['lastFiveGames'][1]['events'][1]['gameDate'][5:10], CFB_event_data_json['lastFiveGames'][0]['events'][1]['atVs'] + " " + CFB_event_data_json['lastFiveGames'][0]['events'][1]['opponent']['abbreviation'], CFB_event_data_json['lastFiveGames'][0]['events'][1]['gameResult'], CFB_event_data_json['lastFiveGames'][0]['events'][1]['score'])
+		previous_games.add_row(CFB_event_data_json['lastFiveGames'][1]['events'][0]['gameDate'][5:10], CFB_event_data_json['lastFiveGames'][1]['events'][0]['atVs'] + " " + CFB_event_data_json['lastFiveGames'][1]['events'][0]['opponent']['abbreviation'], CFB_event_data_json['lastFiveGames'][1]['events'][0]['gameResult'], CFB_event_data_json['lastFiveGames'][1]['events'][0]['score'], CFB_event_data_json['lastFiveGames'][1]['events'][0]['gameDate'][5:10], CFB_event_data_json['lastFiveGames'][0]['events'][0]['atVs'] + " " + CFB_event_data_json['lastFiveGames'][0]['events'][0]['opponent']['abbreviation'], CFB_event_data_json['lastFiveGames'][0]['events'][0]['gameResult'], CFB_event_data_json['lastFiveGames'][0]['events'][0]['score'])
+	except:
+		previous_games = ""
 
 	#Print basic game info, then visiting & home team stats, leaders, injuries, & last 5 games; still some blank team leader stats ok, as in past (early in week issue?)
 
@@ -726,34 +778,29 @@ def CFB_pre_game(game_number):
 		misc_status = misc_status+broadcast+", "
 	if odds != "" and over_under != "":
 		misc_status = misc_status+"LINE O/U: "+odds+", "+str(over_under)
-	else:                                                                   
-		misc_status = misc_status+"NO LINE"                                 
+	else:
+		misc_status = misc_status+"NO LINE"
 	if misc_status != " ":
 		print(misc_status)
 	if notes != "":
 		print(" " + notes)
 	print()
-	if visitor_stats != "":
-		print(visitor_stats)
+	console.print(team_stats)
+	print()
+	print(" Last 5 Games:")
+	console.print(previous_games)
+	print()
 	if visitor_leaders != " ":
-		print(visitor_leaders)
-	if visitor_previous_games != " Previous Games: ":
-		print(visitor_previous_games)
-		print()
-	if home_stats != "":
-		print(home_stats)
+		print(" " + visitor + " Season Totals Leaders:" + visitor_leaders)
 	if home_leaders != " ":
-		print(home_leaders)
-	if home_previous_games != " Previous Games: ":
-		print(home_previous_games)
-		print()
+		print(" " + home + " Season Totals Leaders:" + home_leaders)
+	print("------------------------------------------------------------------------")
 
 #Mainline
-#Due to API throttling of requesting more than one day at a time, only 1 day is supported as an optional parameter. Script this program if more than 1 day desired. Due to issues with throttling, wait 1 minute between calls of this program for 1 day of box scores.
 
 if len(sys.argv) == 2:
 	date_arg = str(sys.argv[1])
-	url = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=200&dates=" + date_arg + "-" + date_arg
+	url = "https://site.api.espn.com/apis/site/v2/sports/football/college-football/scoreboard?groups=80&limit=200&dates=" + date_arg
 	try:
 		game_date = datetime.datetime(int(date_arg[0:4]), int(date_arg[4:6]), int(date_arg[6:8]))
 	except:
