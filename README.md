@@ -1,5 +1,16 @@
 # ESPN-API
 
+## Update 9-16-26: ESPN has blocked date ranges in Scoreboard API calls as of 9-15-26. I've always suggested that users use one date at a time anyway, but almost all of the scripts in the repository will require updating. I will begin work on changing & testing new versions.
+
+If you'd like in the interim, change the line in almost all of the Python scripts from the format:
+
+`url = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=" + date_arg + "-" + date_arg`
+
+to
+
+`url = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=" + date_arg`
+
+---
 Miscellaneous Python command line utilities to access the ESPN API. Primarily designed for post-game box scores, but they can be used for game preview data as available, and in-game partial box scores. Includes utilities for maintaining a NFL SQLite database throughout the season.
 
 **Note that there are [updates for the upcoming NFL season](#new-nfl-updates-for-august-2026), as well as a brand new system for [downloading a daily soccer final score roundup](#soccer-final-score-daily-roundup-instructions).**
