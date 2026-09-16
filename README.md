@@ -2,7 +2,7 @@
 
 ## Update 9-16-26: ESPN has blocked date ranges in Scoreboard API calls as of 9-15-26. I've always suggested that users use one date at a time anyway, but almost all of the scripts in the repository will require updating. I will begin work on changing & testing new versions.
 
-If you'd like in the interim, change the line in almost all of the Python scripts from the format:
+If you'd like in the interim, change the line in almost all of the Python scripts from the format (just delete the extra date concatenation):
 
 `url = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=" + date_arg + "-" + date_arg`
 
