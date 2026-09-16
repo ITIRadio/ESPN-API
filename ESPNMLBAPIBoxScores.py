@@ -20,7 +20,6 @@ def MLB_post_game(game_number):
 	console = Console()
 
 	game_status = MLB_data_json['events'][game_number]['status']['type']['shortDetail']
-
 	stadium = MLB_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
 	try:
 		stadium = stadium + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + MLB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state'] + ", A-" + f"{MLB_data_json['events'][game_number]['competitions'][0]['attendance']:,}" + ", T-" + MLB_event_data_json['gameInfo']['gameDuration']
@@ -137,7 +136,7 @@ def MLB_post_game(game_number):
 				batter_name = MLB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][batter]['athlete']['displayName']
 			else:
 				batter_name = " " + MLB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][batter]['athlete']['displayName']
-			try:    
+			try:
 				pos = MLB_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][batter]['positions'][0]['abbreviation']
 				for multi_pos in range (1,5):
 					try:
@@ -620,7 +619,7 @@ def MLB_pre_game(game_number):
 	else:
 		visitor_rpg = ""
 		visitor_hpg = ""
-	
+
 	try:
 		home_totals = " Team Totals: " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue']) + home_rpg + " Runs, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue']) + home_hpg + " Hits, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][2]['displayValue']) + " Avg., " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][6]['displayValue']) + " ERA"
 		visitor_totals = " Team Totals: " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue']) + visitor_rpg + " Runs, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][0]['displayValue']) + visitor_hpg + " Hits, " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][2]['displayValue']) + " Avg., " + str(MLB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][6]['displayValue']) + " ERA"
@@ -673,11 +672,10 @@ def MLB_pre_game(game_number):
 	print("----------------------------------------")
 	
 #Mainline
-#Due to API throttling of requesting more than one day at a time, only 1 day is supported as an optional parameter. Script this program if more than 1 day desired. Due to issues with throttling, wait 1 minute between calls of this program for 1 day of box scores.
 
 if len(sys.argv) == 2:
 	date_arg = str(sys.argv[1])
-	url = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=" + date_arg + "-" + date_arg
+	url = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=" + date_arg
 	try:
 		game_date = datetime.datetime(int(date_arg[0:4]), int(date_arg[4:6]), int(date_arg[6:8]))     
 	except:

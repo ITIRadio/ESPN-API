@@ -628,7 +628,7 @@ def NFL_post_game(game_number):
 if len(sys.argv) == 3:
 	date_arg = str(sys.argv[1])
 	db_file_name = str(sys.argv[2])
-	url = "http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=" + date_arg + "-" + date_arg
+	url = "http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=" + date_arg
 	try:
 		game_date = date_arg
 		datetime.strptime(game_date, "%Y%m%d")                 # Checks for valid date (strptime overwrites date itself within call)

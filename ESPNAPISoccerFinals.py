@@ -1,7 +1,7 @@
 from urllib.request import urlopen
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 import pytz
 import re
 from rich.console import Console
@@ -122,6 +122,70 @@ def summary(game_number):
 		game_events = game_events[:-2]
 		print(game_events)
 
+def preview(game_number):
+	
+	print(league_scoreboard_json['events'][game_number]['name'])
+	print(" " + league_scoreboard_json['events'][game]['status']['type']['detail'])
+	home_abbr = league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['abbreviation']
+	visitor_abbr = league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['abbreviation']
+	try:
+		stadium = league_scoreboard_json['events'][game_number]['competitions'][0]['venue']['fullName']
+	except:
+		stadium = ""
+	try:
+		location = league_scoreboard_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + league_scoreboard_json['events'][game_number]['competitions'][0]['venue']['address']['country']
+	except:
+		location = ""
+	try:
+		notes = league_scoreboard_json['events'][game_number]['competitions'][0]['altGameNote']
+	except:
+		notes = ""
+	try:
+		notes = notes + ", " + league_scoreboard_json['events'][game_number]['competitions'][0]['notes'][0]['text']
+	except:
+		pass
+	try:
+		home_record = league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['records'][0]['summary']
+	except:
+		home_record = ""
+	try:
+		visitor_record = league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['records'][0]['summary']
+	except:
+		visitor_record = ""
+	try:
+		headline = league_scoreboard_json['events'][game_number]['competitions'][0]['headlines'][0]['shortLinkText'] + "--" + league_scoreboard_json['events'][game_number]['competitions'][0]['headlines'][0]['description']
+	except:
+		headline = ""
+	try:
+		home_form = league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['form']
+	except:
+		home_form = ""
+	try:
+		visitor_form = league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['form']
+	except:
+		visitor_form = ""
+	try:
+		odds = " Moneyline: " + league_scoreboard_json['events'][game_number]['competitions'][0]['odds'][0]['details']
+	except:
+		odds = ""
+
+	if stadium != "" and location != "":
+		print(" " + stadium + ", " + location)
+	if stadium != "" and location == "":
+		print(" " + stadium)
+	if stadium == "" and location != "":
+		print(" " + location)
+	if notes != "":
+		print(" " + notes)
+	if headline != "":
+		print(" " + headline)
+	if home_record != "" and home_form != "":
+		print(" " + home_abbr + ": " + home_record + ", Form " + home_form)
+	if visitor_record != "" and visitor_form != "":
+		print(" " + visitor_abbr + ": " + visitor_record + ", Form " + visitor_form)
+	if odds != "":
+		print(odds)
+	
 
 #Mainline
 
@@ -130,7 +194,7 @@ if len(sys.argv) == 3:
 	league_list_file_name = str(sys.argv[2])
 	try:
 		game_date = date_arg
-		datetime.strptime(game_date, "%Y%m%d")                 # Checks for valid date (strptime overwrites date itself within call)
+		game_date = datetime.strptime(game_date, "%Y%m%d")
 	except:
 		print("Use command format: python3 -u ESPNAPISoccerFinals.py YYYYMMDD League_URL_List.txt using one game day as a parameter and league URL list file must already exist.")
 		exit()
@@ -144,10 +208,12 @@ else:
 	print("Use command format: python3 -u ESPNAPISoccerFinals.py YYYYMMDD League_URL_List.txt using one game day as a parameter and league URL list file must already exist.")
 	exit()
 
+game_date = game_date.strftime('%Y%m%d')
+
 for league in league_url_list:
 	league = league.strip()
+	league = league + "?dates=" + game_date
 	try:
-		league = league + "?dates=" + game_date + "-" + game_date
 		league_today = urlopen(league)
 	except:
 		continue                #Sometimes loads OK with no games but raises unknown exception, has no games anyway so just skip like other inactive leagues
@@ -155,11 +221,12 @@ for league in league_url_list:
 	for game in range (0, 50):
 		try:
 			game_state = league_scoreboard_json['events'][game]['status']['type']['state']
-			if game_state == "post":
+			if game_state == "post" or game_state == "in":
 				summary(game)
+			if game_state == "pre":
+				preview(game)
 			print("--------------------------------------------------------------------------------")
 		except IndexError:      #Either out of games that have gone final, or no games in that league on given date, so skip to next league silently
 			continue
 
 
-		
