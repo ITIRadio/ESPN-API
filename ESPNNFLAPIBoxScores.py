@@ -116,7 +116,6 @@ def NFL_post_game(game_number):
 				except IndexError:
 					continue
 			drives_plays = drives_plays + "\n"
-
 		except (IndexError, KeyError) as api_bad_data_problem:  #Drive Result sometimes throws error, catch as additional exception, just skip as blank ok
 			continue
 	if drives_plays != " Drives & Play-by-play:\n":
@@ -224,8 +223,8 @@ def NFL_post_game(game_number):
 	home_fumb_recovery = []
 	for player in range(0, 10):
 		try:
-			if int(NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][0]) >= 1:
-				home_fumbles = home_fumbles + NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['athlete']['displayName'] + " " + NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][0] + " Fumbles, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][1] + " Fumbles Lost; "
+			if int(NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][0]) >= 1 or int(NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][2]) >= 1:
+				home_fumbles = home_fumbles + NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['athlete']['displayName'] + " " + NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][0] + " Fumbles, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][1] + " Fumbles Lost, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][2] + " Fumbles Recovered; "
 			if int(NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['stats'][2]) >= 1:
 				home_fumb_recovery.append(NFL_event_data_json['boxscore']['players'][1]['statistics'][3]['athletes'][player]['athlete']['displayName'])
 		except IndexError:
@@ -359,8 +358,8 @@ def NFL_post_game(game_number):
 	visitor_fumb_recovery = []
 	for player in range(0, 10):
 		try:
-			if int(NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][0]) >= 1:
-				visitor_fumbles = visitor_fumbles + NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['athlete']['displayName'] + " " + NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][0] + " Fumbles, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][1] + " Fumbles Lost; "
+			if int(NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][0]) >= 1 or int(NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][2]) >= 1:
+				visitor_fumbles = visitor_fumbles + NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['athlete']['displayName'] + " " + NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][0] + " Fumbles, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][1] + " Fumbles Lost, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][2] + " Fumbles Recovered; "
 			if int(NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['stats'][2]) >= 1:
 				visitor_fumb_recovery.append(NFL_event_data_json['boxscore']['players'][0]['statistics'][3]['athletes'][player]['athlete']['displayName'])
 		except IndexError:
@@ -539,7 +538,7 @@ def NFL_post_game(game_number):
 	print()
 
 def NFL_in_progress(game_number):
-	
+
 	#Make event call for current game, game_number is parm passed into def
 	
 	url_event = "http://site.api.espn.com/apis/site/v2/sports/football/nfl/summary?event=" + NFL_data_json['events'][game_number]['id']
@@ -548,9 +547,30 @@ def NFL_in_progress(game_number):
 	
 	#Build home & visiting team stat lines, plus team in possession & drive stats
 
+	console = Console()
+	
 	try:
-		home_team_stats = " " + NFL_event_data_json['boxscore']['teams'][1]['team']['abbreviation'] + ": " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue'] + " " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][0]['label'] + ", " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][16]['displayValue'] + "-" + NFL_event_data_json['boxscore']['teams'][1]['statistics'][15]['displayValue'] + " Rushing, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][11]['displayValue'] + ", " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][10]['displayValue'] + " Yds Passing, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][7]['displayValue'] + " Total Yds, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][13]['displayValue'] + " Int, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][14]['displayValue'] + " " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][14]['label'] + "\n" + " " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][21]['displayValue'] + " Fum Lost, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][4]['displayValue'] + " 3rd Downs, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][5]['displayValue'] + " 4th Downs, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][19]['displayValue'] + " Penalties, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][6]['displayValue'] + " Total Plays, " + NFL_event_data_json['boxscore']['teams'][1]['statistics'][24]['displayValue'] + " Possession"
-		visitor_team_stats = " " + NFL_event_data_json['boxscore']['teams'][0]['team']['abbreviation'] + ": " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue'] + " " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][0]['label'] + ", " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][16]['displayValue'] + "-" + NFL_event_data_json['boxscore']['teams'][0]['statistics'][15]['displayValue'] + " Rushing, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][11]['displayValue'] + ", " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][10]['displayValue'] + " Yds Passing, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][7]['displayValue'] + " Total Yds, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][13]['displayValue'] + " Int, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][14]['displayValue'] + " " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][14]['label'] + "\n" + " " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][21]['displayValue'] + " Fum Lost, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][4]['displayValue'] + " 3rd Downs, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][5]['displayValue'] + " 4th Downs, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][19]['displayValue'] + " Penalties, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][6]['displayValue'] + " Total Plays, " + NFL_event_data_json['boxscore']['teams'][0]['statistics'][24]['displayValue'] + " Possession"
+		team_stats = Table(box=None, header_style="default")
+		team_stats.add_column("")
+		team_stats.add_column(NFL_event_data_json['boxscore']['teams'][0]['team']['abbreviation'], justify="right")
+		team_stats.add_column(NFL_event_data_json['boxscore']['teams'][1]['team']['abbreviation'], justify="right")
+		team_stats.add_row("1st Downs", NFL_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue'])
+		team_stats.add_row("Rushing", NFL_event_data_json['boxscore']['teams'][0]['statistics'][16]['displayValue'] + "-" + NFL_event_data_json['boxscore']['teams'][0]['statistics'][15]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][16]['displayValue'] + "-" + NFL_event_data_json['boxscore']['teams'][1]['statistics'][15]['displayValue'])
+		team_stats.add_row("Passing", NFL_event_data_json['boxscore']['teams'][0]['statistics'][11]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][11]['displayValue'])
+		team_stats.add_row("Passing Yds", NFL_event_data_json['boxscore']['teams'][0]['statistics'][10]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][10]['displayValue'])
+		team_stats.add_row("Total Yds", NFL_event_data_json['boxscore']['teams'][0]['statistics'][7]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][7]['displayValue'])
+		team_stats.add_row("Had Intercepted", NFL_event_data_json['boxscore']['teams'][0]['statistics'][13]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][13]['displayValue'])
+		team_stats.add_row("Fumbles Lost", NFL_event_data_json['boxscore']['teams'][0]['statistics'][21]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][21]['displayValue'])
+		team_stats.add_row("Sacked-Yds Lost", NFL_event_data_json['boxscore']['teams'][0]['statistics'][14]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][14]['displayValue'])
+		team_stats.add_row("3rd Down Conversions", NFL_event_data_json['boxscore']['teams'][0]['statistics'][4]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][4]['displayValue'])
+		team_stats.add_row("4th Down Conversions", NFL_event_data_json['boxscore']['teams'][0]['statistics'][5]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][5]['displayValue'])
+		team_stats.add_row("Penalties", NFL_event_data_json['boxscore']['teams'][0]['statistics'][19]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][19]['displayValue'])
+		team_stats.add_row("Total Plays", NFL_event_data_json['boxscore']['teams'][0]['statistics'][6]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][6]['displayValue'])
+		team_stats.add_row("Time of Possession", NFL_event_data_json['boxscore']['teams'][0]['statistics'][24]['displayValue'], NFL_event_data_json['boxscore']['teams'][1]['statistics'][24]['displayValue'])
+	except:
+		team_stats = ""
+	
+	try:
 		current_drive = NFL_event_data_json['drives']['current']['description']
 		current_drive_possession = NFL_event_data_json['drives']['current']['team']['abbreviation']
 	except:
@@ -561,67 +581,106 @@ def NFL_in_progress(game_number):
 		
 	#Build all player stats
 	
-	home_passing = " Passing: "
+	home_passing = Table(box=None, header_style="default")
+	home_passing.add_column("Passing")
+	home_passing.add_column("Comp/Att", justify="right")
+	home_passing.add_column("Yds", justify="right")
+	home_passing.add_column("TD", justify="right")
+	home_passing.add_column("Int", justify="right")
+	home_passing.add_column("Rtg", justify="right")
+	
 	for player in range(0, 3):
 		try:
-			home_passing = home_passing + NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['displayName'] + " " + NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][0] + ", " + NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][1] + " Yds, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][3] + " TD, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][4] + " Int, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][6] + " Rtg, "  
+			home_passing.add_row (NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['athlete']['displayName'], NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][0], str(NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][1]), str(NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][3]), str(NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][4]), str(NFL_event_data_json['boxscore']['players'][1]['statistics'][0]['athletes'][player]['stats'][6]))
 		except IndexError:
 			continue
-	home_passing = home_passing[:-2]
 	
-	home_rushing = " Rushing: "
+	home_rushing = Table(box=None, header_style="default")
+	home_rushing.add_column("Rushing")
+	home_rushing.add_column("Carries", justify="right")
+	home_rushing.add_column("Yds", justify="right")
+	home_rushing.add_column("TD", justify="right")
+	home_rushing.add_column("Long", justify="right")
+	
 	for player in range(0, 7):
 		try:
-			home_rushing = home_rushing + NFL_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['athlete']['displayName'] + " " + NFL_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][0] + " Carries, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][1] + " Yds, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][3] + " TD, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][4] + " Long, "  
+			home_rushing.add_row(NFL_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['athlete']['displayName'], str(NFL_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][0]), str(NFL_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][1]), str(NFL_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][3]), str(NFL_event_data_json['boxscore']['players'][1]['statistics'][1]['athletes'][player]['stats'][4]))
 		except IndexError:
 			continue
-	home_rushing = home_rushing[:-2]
 	
-	home_receiving = " Receiving: "
+	home_receiving = Table(box=None, header_style="default")
+	home_receiving.add_column("Receiving")
+	home_receiving.add_column("Rec", justify="right")
+	home_receiving.add_column("Yds", justify="right")
+	home_receiving.add_column("TD", justify="right")
+	home_receiving.add_column("Long", justify="right")
+	home_receiving.add_column("Tgt", justify="right")
+	
 	for player in range(0, 10):
 		try:
-			home_receiving = home_receiving + NFL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['athlete']['displayName'] + " " + NFL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][0] + " Receptions, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][1] + " Yds, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][3] + " TD, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][4] + " Long, " + NFL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][5] + " Tgt, "
+			home_receiving.add_row(NFL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['athlete']['displayName'], str(NFL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][0]), str(NFL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][1]), str(NFL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][3]), str(NFL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][4]), str(NFL_event_data_json['boxscore']['players'][1]['statistics'][2]['athletes'][player]['stats'][5]))
 		except IndexError:
 			continue
-	home_receiving = home_receiving[:-2]
 
-	visitor_passing = " Passing: "
+	visitor_passing = Table(box=None, header_style="default")
+	visitor_passing.add_column("Passing")
+	visitor_passing.add_column("Comp/Att", justify="right")
+	visitor_passing.add_column("Yds", justify="right")
+	visitor_passing.add_column("TD", justify="right")
+	visitor_passing.add_column("Int", justify="right")
+	visitor_passing.add_column("Rtg", justify="right")
+	
 	for player in range(0, 3):
 		try:
-			visitor_passing = visitor_passing + NFL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['displayName'] + " " + NFL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][0] + ", " + NFL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][1] + " Yds, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][3] + " TD, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][4] + " Int, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][6] + " Rtg, "  
+			visitor_passing.add_row (NFL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['athlete']['displayName'], NFL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][0], str(NFL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][1]), str(NFL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][3]), str(NFL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][4]), str(NFL_event_data_json['boxscore']['players'][0]['statistics'][0]['athletes'][player]['stats'][6]))
 		except IndexError:
 			continue
-	visitor_passing = visitor_passing[:-2]
 	
-	visitor_rushing = " Rushing: "
+	visitor_rushing = Table(box=None, header_style="default")
+	visitor_rushing.add_column("Rushing")
+	visitor_rushing.add_column("Carries", justify="right")
+	visitor_rushing.add_column("Yds", justify="right")
+	visitor_rushing.add_column("TD", justify="right")
+	visitor_rushing.add_column("Long", justify="right")
+	
 	for player in range(0, 7):
 		try:
-			visitor_rushing = visitor_rushing + NFL_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['athlete']['displayName'] + " " + NFL_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][0] + " Carries, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][1] + " Yds, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][3] + " TD, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][4] + " Long, "  
+			visitor_rushing.add_row(NFL_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['athlete']['displayName'], str(NFL_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][0]), str(NFL_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][1]), str(NFL_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][3]), str(NFL_event_data_json['boxscore']['players'][0]['statistics'][1]['athletes'][player]['stats'][4]))
 		except IndexError:
 			continue
-	visitor_rushing = visitor_rushing[:-2]
 	
-	visitor_receiving = " Receiving: "
+	visitor_receiving = Table(box=None, header_style="default")
+	visitor_receiving.add_column("Receiving")
+	visitor_receiving.add_column("Rec", justify="right")
+	visitor_receiving.add_column("Yds", justify="right")
+	visitor_receiving.add_column("TD", justify="right")
+	visitor_receiving.add_column("Long", justify="right")
+	visitor_receiving.add_column("Tgt", justify="right")
+	
 	for player in range(0, 10):
 		try:
-			visitor_receiving = visitor_receiving + NFL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['athlete']['displayName'] + " " + NFL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][0] + " Receptions, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][1] + " Yds, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][3] + " TD, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][4] + " Long, " + NFL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][5] + " Tgt, "
+			visitor_receiving.add_row(NFL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['athlete']['displayName'], str(NFL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][0]), str(NFL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][1]), str(NFL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][3]), str(NFL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][4]), str(NFL_event_data_json['boxscore']['players'][0]['statistics'][2]['athletes'][player]['stats'][5]))
 		except IndexError:
 			continue
-	visitor_receiving = visitor_receiving[:-2]
-	
+
+	scoring_plays = " Scoring Plays:" + "\n "
+	for play in range(0,20):
+		try:
+			scoring_plays = scoring_plays + NFL_event_data_json['scoringPlays'][play]['team']['abbreviation'] + ": " + NFL_event_data_json['scoringPlays'][play]['text'].rstrip().lstrip() + ", Qtr " + str(NFL_event_data_json['scoringPlays'][play]['period']['number']) + ", " + NFL_event_data_json['scoringPlays'][play]['clock']['displayValue'] + "\n "
+		except:                #Not just IdxErr only, all necessary
+			continue
+	if scoring_plays != "Scoring Plays:\n":
+		scoring_plays = scoring_plays[:-2]
+
 	#Build basic game info, stadium, teams, record, score, last play, timeouts, down & distance, time remaining if available
 
 	stadium = NFL_data_json['events'][game_number]['competitions'][0]['venue']['fullName']
 	home = NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['displayName']
+	home_record = NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['records'][0]['summary']
 	home_score = NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['score']
 	visitor = NFL_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['displayName']
+	visitor_record = NFL_data_json['events'][game_number]['competitions'][0]['competitors'][1]['records'][0]['summary']
 	visitor_score = NFL_data_json['events'][game_number]['competitions'][0]['competitors'][1]['score']
-	try:
-		home_record = NFL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['records'][0]['summary']
-		visitor_record = NFL_data_json['events'][game_number]['competitions'][0]['competitors'][1]['records'][0]['summary']
-	except:
-		home_record = ""
-		visitor_record = ""	
 	try:
 		last_play = NFL_data_json['events'][game_number]['competitions'][0]['situation']['lastPlay']['text']
 		home_timeouts = NFL_data_json['events'][game_number]['competitions'][0]['situation']['homeTimeouts']
@@ -649,27 +708,38 @@ def NFL_in_progress(game_number):
 	
 	#Print game header, team, scores, etc.
 	
-	print(visitor, "("+visitor_record+") " + str(visitor_timeouts) + " T/O   "+visitor_add_spc, visitor_score)    
+	print(visitor, "("+visitor_record+") " + str(visitor_timeouts) + " T/O   "+visitor_add_spc, visitor_score)    # str() nec b/c +'s with numbers
 	print(home, "("+home_record+") "+str(home_timeouts)+" T/O   "+home_add_spc, home_score)
 	if down_distance_ball_on != "":
 		print (" "+down_distance_ball_on)
-	print(" "+game_status, "\n", current_drive_possession+" Ball: "+current_drive, "\n", last_play)
+	print(" "+game_status, "\n", current_drive_possession+" Ball: "+current_drive, "\n", last_play.strip())
 
 	#Print game stats as available
 	
-	if visitor_team_stats != "":
-		print()
-		print(visitor_team_stats)
-	print(visitor_passing)
-	print(visitor_rushing)
-	print(visitor_receiving)
-	if home_team_stats != "":
-		print()
-		print(home_team_stats)
-	print(home_passing)
-	print(home_rushing)
-	print(home_receiving)
 	print()
+	console.print(team_stats)
+	print()
+	print(" " + visitor + " Individual Stats:")
+	print()
+	console.print(visitor_passing)
+	print()
+	console.print(visitor_rushing)
+	print()
+	console.print(visitor_receiving)
+	print()
+	print(" " + home + " Individual Stats:")
+	print()
+	console.print(home_passing)
+	print()
+	console.print(home_rushing)
+	print()
+	console.print(home_receiving)
+	print()
+
+	if scoring_plays != "Scoring Plays:\n":
+		print(scoring_plays)
+
+	print("-------------------------------------------------------")
 
 def NFL_pre_game(game_number):
 	
@@ -748,7 +818,6 @@ def NFL_pre_game(game_number):
 	except:
 		previous_games = ""
 
-
 	#Build visiting & home stat player leaders
 
 	visitor_leaders = " "
@@ -810,16 +879,14 @@ def NFL_pre_game(game_number):
 		print(home_leaders)
 	if home_injuries != " Injuries: ":
 		print(home_injuries)
-	print()
 	print("-------------------------------------------------------")
-	print()
 
 #Mainline
 #Due to API throttling of requesting more than one day at a time, only 1 day is supported as an optional parameter. Script this program if more than 1 day desired. Due to issues with throttling, wait 1 minute between calls of this program for 1 day of box scores.
 
 if len(sys.argv) == 2:
 	date_arg = str(sys.argv[1])
-	url = "http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=" + date_arg + "-" + date_arg
+	url = "http://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard?dates=" + date_arg
 	try:
 		game_date = datetime.datetime(int(date_arg[0:4]), int(date_arg[4:6]), int(date_arg[6:8]))     
 	except:
