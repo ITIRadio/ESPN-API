@@ -59,35 +59,47 @@ def summary(game_number):
 		visitor_record = ""
 	home_score = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['score'])
 	visitor_score = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['score'])
-	home_fouls_committed = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue'])
-	visitor_fouls_committed = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue'])
-	home_corners = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][2]['displayValue'])
-	visitor_corners = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][2]['displayValue'])
-	home_possession = league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][4]['displayValue'] + "%"
-	visitor_possession = league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][4]['displayValue'] + "%"
-	home_sog = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][6]['displayValue'])
-	visitor_sog = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][6]['displayValue'])
-	home_shot_att = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][8]['displayValue'])
-	visitor_shot_att = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][8]['displayValue'])
+	try:
+		home_fouls_committed = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue'])
+		visitor_fouls_committed = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue'])
+		home_corners = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][2]['displayValue'])
+		visitor_corners = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][2]['displayValue'])
+		home_possession = league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][4]['displayValue'] + "%"
+		visitor_possession = league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][4]['displayValue'] + "%"
+		home_sog = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][6]['displayValue'])
+		visitor_sog = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][6]['displayValue'])
+		home_shot_att = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][8]['displayValue'])
+		visitor_shot_att = str(league_scoreboard_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][8]['displayValue'])
+	except:          # Sometimes if no stats available, 0's filled in, other times, just blank list []
+		home_fouls_committed = visitor_fouls_committed = home_corners = visitor_corners = home_possession = visitor_possession = home_sog = visitor_sog = home_shot_att = visitor_shot_att = "0"
 
 	score_box = Table(box=None, header_style="default")
 	score_box.add_column(status)
-	if home_record != "" and visitor_record != "":
+	if home_record != "":
 		score_box.add_column("Record")
 	score_box.add_column("Goals", justify="right")
-	score_box.add_column("Possession", justify="right")
-	score_box.add_column("Shots on Goal", justify="right")
-	score_box.add_column("Shots Attempted", justify="right")
-	score_box.add_column("Fouls Committed", justify="right")
-	score_box.add_column("Corners", justify="right")
-	if home_record != "" and visitor_record != "":
+	if home_fouls_committed != "0":
+		score_box.add_column("Possession", justify="right")
+		score_box.add_column("Shots on Goal", justify="right")
+		score_box.add_column("Shots Attempted", justify="right")
+		score_box.add_column("Fouls Committed", justify="right")
+		score_box.add_column("Corners", justify="right")
+
+	if home_record != "" and home_fouls_committed != "0":
 		score_box.add_row(home, home_record, home_score, home_possession, home_sog, home_shot_att, home_fouls_committed, home_corners)
 		score_box.add_row(visitor, visitor_record, visitor_score, visitor_possession, visitor_sog, visitor_shot_att, visitor_fouls_committed, visitor_corners)
-	else:
+	elif home_record == "" and home_fouls_committed != "0":
 		score_box.add_row(home, home_score, home_possession, home_sog, home_shot_att, home_fouls_committed, home_corners)
 		score_box.add_row(visitor, visitor_score, visitor_possession, visitor_sog, visitor_shot_att, visitor_fouls_committed, visitor_corners)
+	elif home_record != "" and home_fouls_committed == "0":
+		score_box.add_row(home, home_record, home_score)
+		score_box.add_row(visitor, visitor_record, visitor_score)
+	else:
+		score_box.add_row(home, home_score)
+		score_box.add_row(visitor, visitor_score)
+
 	console.print(score_box)
-	
+
 	try:
 		headline = league_scoreboard_json['events'][game_number]['competitions'][0]['headlines'][0]['shortLinkText'] + "--" + league_scoreboard_json['events'][game_number]['competitions'][0]['headlines'][0]['description']
 	except:
@@ -104,7 +116,6 @@ def summary(game_number):
 		print(" " + game_date + ": " + headline)
 	else:
 		print(" " + game_date)
-	print()
 	
 	game_events = " Game Summary:\n "
 	for game_event_index in range(0, 50):
@@ -120,6 +131,7 @@ def summary(game_number):
 
 	if game_events != " Game Summary:\n ":
 		game_events = game_events[:-2]
+		print()
 		print(game_events)
 
 def preview(game_number):
