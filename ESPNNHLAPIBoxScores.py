@@ -233,15 +233,43 @@ def NHL_post_game(game_number):
 			visitor_goaltender_stats = visitor_goaltender_stats + player_name + " " + player_saves + " Saves, " + player_ga + " Goals Against, " + player_pct + " Save Percent, " + player_toi + " Time On Ice, " + player_pim + " Penalty Min, "
 		except IndexError:
 			continue
-	visitor_goaltender_stats = visitor_goaltender_stats[:-2]	
+	visitor_goaltender_stats = visitor_goaltender_stats[:-2]
 	
-	home_player_stats.add_row("Totals", str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue']), "", "", str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][12]['displayValue']) + "-" + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][13]['displayValue']), str(home_miss), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][1]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue']) + "-" + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][2]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][11]['displayValue']))
-	home_player_stats.add_row("On Goal Pct.", str(format(int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue']) / (int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue']) + int(home_miss) + int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue'])), ".1%")),"","","","","", "", str(format(int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue']) / (int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue']) + int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue'])), ".1%")))
-	home_player_stats.add_row("Shooting Pct.", str(format(int(home_score) / (int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue']) + int(home_miss) + int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue'])), ".1%")))
+	home_total_shots = int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][3]['displayValue'])
+	home_nbr_pen = int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][12]['displayValue'])
+	home_total_pim = int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][13]['displayValue'])
+	home_total_blks = int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue'])
+	home_total_hits = int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][1]['displayValue'])
+	home_faceoffs_won = int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue'])
+	home_total_takes = int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][2]['displayValue'])
+	home_total_gives = int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][11]['displayValue'])
 	
-	visitor_player_stats.add_row("Totals", str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue']), "", "", str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][12]['displayValue']) + "-" + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][13]['displayValue']), str(visitor_miss), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][1]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue']) + "-" + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][2]['displayValue']), str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][11]['displayValue']))
-	visitor_player_stats.add_row("On Goal Pct.", str(format(int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue']) / (int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue']) + int(visitor_miss) + int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue'])), ".1%")),"","","","","", "", str(format(int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue']) / (int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue']) + int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][9]['displayValue'])), ".1%")))
-	visitor_player_stats.add_row("Shooting Pct.", str(format(int(visitor_score) / (int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue']) + int(visitor_miss) + int(NHL_event_data_json['boxscore']['teams'][1]['statistics'][0]['displayValue'])), ".1%")))
+	visitor_total_shots = int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][3]['displayValue'])
+	visitor_nbr_pen = int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][12]['displayValue'])
+	visitor_total_pim = int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][13]['displayValue'])
+	visitor_total_blks = int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][0]['displayValue'])
+	visitor_total_hits = int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][1]['displayValue'])
+	visitor_faceoffs_won = int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][9]['displayValue'])
+	visitor_total_takes = int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][2]['displayValue'])
+	visitor_total_gives = int(NHL_event_data_json['boxscore']['teams'][0]['statistics'][11]['displayValue'])
+	
+	total_faceoffs =  home_faceoffs_won + visitor_faceoffs_won
+	home_faceoff_pct = home_faceoffs_won / total_faceoffs if total_faceoffs > 0 else 0
+	visitor_faceoff_pct = visitor_faceoffs_won / total_faceoffs if total_faceoffs > 0 else 0
+	
+	home_on_goal_pct = home_total_shots / (home_total_shots + home_miss + visitor_total_blks) if (home_total_shots + home_miss + visitor_total_blks) > 0 else 0
+	home_shoot_pct = int(home_score) / (home_total_shots + home_miss + visitor_total_blks) if (home_total_shots + home_miss + visitor_total_blks) > 0 else 0
+	
+	visitor_on_goal_pct = visitor_total_shots / (visitor_total_shots + visitor_miss + home_total_blks) if (visitor_total_shots + visitor_miss + home_total_blks) > 0 else 0
+	visitor_shoot_pct = int(visitor_score) / (visitor_total_shots + visitor_miss + home_total_blks) if (visitor_total_shots + visitor_miss + home_total_blks) > 0 else 0
+	
+	home_player_stats.add_row("Totals", str(home_total_shots), "", "", str(home_nbr_pen) + "-" + str(home_total_pim), str(home_miss), str(home_total_blks), str(home_total_hits), str(home_faceoffs_won) + "-" + str(visitor_faceoffs_won), str(home_total_takes), str(home_total_gives))
+	home_player_stats.add_row("On Goal Pct.", str(format(home_on_goal_pct, ".1%")),"","","","","", "", str(format(home_faceoff_pct, ".1%")))
+	home_player_stats.add_row("Shooting Pct.", str(format(home_shoot_pct, ".1%")))
+	
+	visitor_player_stats.add_row("Totals", str(visitor_total_shots), "", "", str(visitor_nbr_pen) + "-" + str(visitor_total_pim), str(visitor_miss), str(visitor_total_blks), str(visitor_total_hits), str(visitor_faceoffs_won) + "-" + str(home_faceoffs_won), str(visitor_total_takes), str(visitor_total_gives))
+	visitor_player_stats.add_row("On Goal Pct.", str(format(visitor_on_goal_pct, ".1%")),"","","","","", "", str(format(visitor_faceoff_pct, ".1%")))
+	visitor_player_stats.add_row("Shooting Pct.", str(format(visitor_shoot_pct, ".1%")))
 	
 	home_team_stats = " " + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][4]['displayValue']) + "/" + str(NHL_event_data_json['boxscore']['teams'][1]['statistics'][5]['displayValue']) + " Power Plays, " + str(NHL_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][1]['displayValue']) + " Team Save Pct."
 	visitor_team_stats = " " + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][4]['displayValue']) + "/" + str(NHL_event_data_json['boxscore']['teams'][0]['statistics'][5]['displayValue']) + " Power Plays, " + str(NHL_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue']) + " Team Save Pct."
