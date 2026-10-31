@@ -35,7 +35,7 @@ The NFL box scores, SQLite database load, and reports have some additions.
 * Reception percentages have been added to the main report script.
 * Also added to the end of the main report script are the team ranking tables for the following aggregate statistics: Offensive & Defensive Points per Game, Offensive & Defensive Total Yards per Game, Offensive & Defensive Rushing Yards per Game, and Offensive & Defensive Passing Yards per Game.
 
-## NFL database utilities
+## NFL Database Utilities
 
 1. To set up your own local copy of the SQLite database, run `python3 CreateNFLStatsSqliteDB.py new_database_file_name.sqlite`.
 2. Updates need to be made daily, game date being specified in YYYYMMDD format,  `python3 -u ESPNNFLAPISqlite.py YYYYMMDD database_file_name.sqlite`.
