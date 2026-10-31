@@ -1,8 +1,8 @@
 from urllib.request import urlopen
 import json
 import sys
-from datetime import datetime       #Necessary for date conversion
-import pytz                         #Dates are in UTC, though never specified
+from datetime import datetime
+import pytz
 import re
 from rich.console import Console
 from rich.table import Table
@@ -33,7 +33,6 @@ def CBB_post_game(game_number):
 	
 	console = Console()
 	
-	#Regular data from scoreboard API, leave leaders assignments for future use
 	try:
 		arena = CBB_data_json['events'][game_number]['competitions'][0]['venue']['fullName'] + ", " + CBB_data_json['events'][game_number]['competitions'][0]['venue']['address']['city'] + ", " + CBB_data_json['events'][game_number]['competitions'][0]['venue']['address']['state']
 	except:
@@ -43,10 +42,10 @@ def CBB_post_game(game_number):
 	game_status = CBB_data_json['events'][game_number]['status']['type']['detail']
 	json_tz = pytz.timezone("UTC")
 	needed_tz = pytz.timezone("US/Eastern")
-	game_date = datetime.strptime(CBB_data_json['events'][game_number]['competitions'][0]['date'], "%Y-%m-%dT%H:%MZ") #Convert whole json date to datetime obj, but in UTC timezone, skip use on other api's
-	game_date = json_tz.localize(game_date).astimezone(needed_tz)       #Convert game_date datetime obj from UTC to US Eastern
-	game_date = game_date.strftime("%m-%d-%Y")    #Convert datetime obj to mm-dd-yyyy
-	#Blank record OK, but some short names don't exist
+	game_date = datetime.strptime(CBB_data_json['events'][game_number]['competitions'][0]['date'], "%Y-%m-%dT%H:%MZ")
+	game_date = json_tz.localize(game_date).astimezone(needed_tz)
+	game_date = game_date.strftime("%m-%d-%Y")
+
 	try:
 		home_short = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['team']['shortDisplayName']
 		visitor_short = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['shortDisplayName']
@@ -83,6 +82,34 @@ def CBB_post_game(game_number):
 		headline = CBB_data_json['events'][game_number]['competitions'][0]['headlines'][0]['shortLinkText']
 	except:
 		headline = ""
+	
+	home_score = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['score']
+	visitor_score = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['score']
+	short_box = "Compressed Box Score:\n"
+	if int(home_score) > int(visitor_score):
+		short_box = short_box + home_short + " " + home_score + ", " + visitor_short + " " + visitor_score
+	else:
+		short_box = short_box + visitor_short + " " + visitor_score + ", " + home_short + " " + home_score
+
+	ot_slash = game_status.find("/")
+	if ot_slash != -1:
+		short_box = short_box + ", " + game_status[ot_slash + 1:] + "\n"
+		tied_score = int(CBB_event_data_json['header']['competitions'][0]['competitors'][0]['linescores'][0]['displayValue']) + int(CBB_event_data_json['header']['competitions'][0]['competitors'][0]['linescores'][1]['displayValue'])
+		ot_note = "Tied at " + str(tied_score) + " after regulation."
+	else:
+		short_box = short_box + "\n"
+		ot_note = ""
+	
+	if home_rank == 99:
+		home_short_box = home_short + " (" + home_score + ") (" + home_record + ")\n  "
+	else:
+		home_short_box = "#" + str(home_rank) + " " + home_short + " (" + home_score + ") (" + home_record + ")\n  "
+	home_short_3s = ""
+	home_reb_leader = ""
+	home_reb_leader_total = 0
+	home_ast_leader = ""
+	home_ast_leader_total = 0
+	home_fouled_out = ""
 	
 	home_player_stats = Table(box=None, header_style="default")
 	home_player_stats.add_column(home_short)
@@ -139,12 +166,30 @@ def CBB_post_game(game_number):
 			home_off_reb += int(player_oreb)
 			home_player_stats.add_row(player_name, player_pos, player_min, player_fg, player_3pt, player_ft, player_reb, player_oreb, player_ast, player_to, player_stl, player_blk, player_fl, player_pts)
 			
+			home_short_box = home_short_box + player_name_short + " " + player_fg + " " + player_ft + " " + player_pts + ", "
+			if int(player_fl) == 5:
+				home_fouled_out = home_fouled_out + player_name_short + ", "
+			if player_3pt != "0-0":
+				home_short_3s = home_short_3s + player_name_short + " " + player_3pt + ", "
+			if int(player_reb) > home_reb_leader_total:
+				home_reb_leader_total = int(player_reb)
+				home_reb_leader = player_name_short
+			elif int(player_reb) == home_reb_leader_total:
+				home_reb_leader = home_reb_leader + ", " + player_name_short
+			else:
+				pass
+			if int(player_ast) > home_ast_leader_total:
+				home_ast_leader_total = int(player_ast)
+				home_ast_leader = player_name_short
+			elif int(player_ast) == home_ast_leader_total:
+				home_ast_leader = home_ast_leader + ", " + player_name_short
+			else:
+				pass
+			
 		except (IndexError, KeyError, ValueError) as api_bad_data_problem:
 			continue
 	
-	home_score = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['score']
 	home_ttl_rebounds = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][0]['displayValue']
-#	home_off_reb = CBB_event_data_json['boxscore']['teams'][1]['statistics'][7]['displayValue']  Not using this, using own ttl, w/o tm rebs
 	home_team_rebs = int(home_ttl_rebounds) - home_rebounds
 	home_assists = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][2]['displayValue']
 	home_fg_pct = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['statistics'][5]['displayValue']
@@ -165,6 +210,25 @@ def CBB_post_game(game_number):
 	home_player_stats.add_row("Totals", "", "", home_fgm + "-" + home_fga, home_3pt_made + "-" + home_3pt_att, home_ftm + "-" + home_fta, home_ttl_rebounds, str(home_off_reb), home_assists, home_to, home_stl, home_blk, home_fls, home_score)
 	home_player_stats.add_row("", "", "", home_fg_pct + "%", home_3pt_pct + "%", home_ft_pct + "%", "", "", "", "", "", "", "", "")
 	
+	home_short_box = home_short_box[:-2] + ". Totals " + home_fgm + "-" + home_fga + " " + home_ftm + "-" + home_fta + " " + home_score + ".\n"
+	home_short_3s = home_short + " " + home_3pt_made + "-" + home_3pt_att + ", " + home_short_3s[:-2] + ". "
+	home_short_reb = home_short + " " + str(home_rebounds) + " (" + home_reb_leader + " " + str(home_reb_leader_total) + ")"
+	home_short_ast = home_short + " " + home_assists + " (" + home_ast_leader + " " + str(home_ast_leader_total) + ")"
+	home_short_fls = home_short + " " + home_fls
+	if home_fouled_out != "":
+		home_fouled_out = home_fouled_out[:-2]
+
+	if visitor_rank == 99:
+		visitor_short_box = visitor_short + " (" + visitor_score + ") (" + visitor_record + ")\n  "
+	else:
+		visitor_short_box = "#" + str(visitor_rank) + " " + visitor_short + " (" + visitor_score + ") (" + visitor_record + ")\n  "
+	visitor_short_3s = ""
+	visitor_reb_leader = ""
+	visitor_reb_leader_total = 0
+	visitor_ast_leader = ""
+	visitor_ast_leader_total = 0
+	visitor_fouled_out = ""
+
 	visitor_player_stats = Table(box=None, header_style="default")
 	visitor_player_stats.add_column(visitor_short)
 	visitor_player_stats.add_column("Pos")
@@ -220,12 +284,30 @@ def CBB_post_game(game_number):
 			visitor_off_reb += int(player_oreb)
 			visitor_player_stats.add_row(player_name, player_pos, player_min, player_fg, player_3pt, player_ft, player_reb, player_oreb, player_ast, player_to, player_stl, player_blk, player_fl, player_pts)
 			
+			visitor_short_box = visitor_short_box + player_name_short + " " + player_fg + " " + player_ft + " " + player_pts + ", "
+			if int(player_fl) == 5:
+				visitor_fouled_out = visitor_fouled_out + player_name_short + ", "
+			if player_3pt != "0-0":
+				visitor_short_3s = visitor_short_3s + player_name_short + " " + player_3pt + ", "
+			if int(player_reb) > visitor_reb_leader_total:
+				visitor_reb_leader_total = int(player_reb)
+				visitor_reb_leader = player_name_short
+			elif int(player_reb) == visitor_reb_leader_total:
+				visitor_reb_leader = visitor_reb_leader + ", " + player_name_short
+			else:
+				pass
+			if int(player_ast) > visitor_ast_leader_total:
+				visitor_ast_leader_total = int(player_ast)
+				visitor_ast_leader = player_name_short
+			elif int(player_ast) == visitor_ast_leader_total:
+				visitor_ast_leader = visitor_ast_leader + ", " + player_name_short
+			else:
+				pass
+			
 		except (IndexError, KeyError, ValueError) as api_bad_data_problem:
 			continue
 	
-	visitor_score = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['score']
 	visitor_ttl_rebounds = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][0]['displayValue']
-#	visitor_off_reb = CBB_event_data_json['boxscore']['teams'][0]['statistics'][7]['displayValue']
 	visitor_team_rebs = int(visitor_ttl_rebounds) - visitor_rebounds
 	visitor_assists = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][2]['displayValue']
 	visitor_fg_pct = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][5]['displayValue']
@@ -246,6 +328,14 @@ def CBB_post_game(game_number):
 	visitor_player_stats.add_row("Totals", "", "", visitor_fgm + "-" + visitor_fga, visitor_3pt_made + "-" + visitor_3pt_att, visitor_ftm + "-" + visitor_fta, visitor_ttl_rebounds, str(visitor_off_reb), visitor_assists, visitor_to, visitor_stl, visitor_blk, visitor_fls, visitor_score)
 	visitor_player_stats.add_row("", "", "", visitor_fg_pct + "%", visitor_3pt_pct + "%", visitor_ft_pct + "%", "", "", "", "", "", "", "", "")
 	
+	visitor_short_box = visitor_short_box[:-2] + ". Totals " + visitor_fgm + "-" + visitor_fga + " " + visitor_ftm + "-" + visitor_fta + " " + visitor_score + ".\n"
+	visitor_short_3s = visitor_short + " " + visitor_3pt_made + "-" + visitor_3pt_att + ", " + visitor_short_3s[:-2] + ". "
+	visitor_short_reb = visitor_short + " " + str(visitor_rebounds) + " (" + visitor_reb_leader + " " + str(visitor_reb_leader_total) + ")"
+	visitor_short_ast = visitor_short + " " + visitor_assists + " (" + visitor_ast_leader + " " + str(visitor_ast_leader_total) + ")"
+	visitor_short_fls = visitor_short + " " + visitor_fls
+	if visitor_fouled_out != "":
+		visitor_fouled_out = visitor_fouled_out[:-2]
+	
 	team_comparison = Table(box=None, header_style="default")
 	team_comparison.add_column("Team Comparison")
 	team_comparison.add_column(str(CBB_event_data_json['header']['competitions'][0]['competitors'][1]['team']['abbreviation']))
@@ -257,7 +347,7 @@ def CBB_post_game(game_number):
 	team_comparison.add_row("Points off Turnovers", str(CBB_event_data_json['boxscore']['teams'][0]['statistics'][18]['displayValue']), str(CBB_event_data_json['boxscore']['teams'][1]['statistics'][18]['displayValue']))
 	team_comparison.add_row("Technical Fouls", str(CBB_event_data_json['boxscore']['teams'][0]['statistics'][16]['displayValue']), str(CBB_event_data_json['boxscore']['teams'][1]['statistics'][16]['displayValue']))
 	team_comparison.add_row("Flagrant Fouls", str(CBB_event_data_json['boxscore']['teams'][0]['statistics'][17]['displayValue']), str(CBB_event_data_json['boxscore']['teams'][1]['statistics'][17]['displayValue']))
-	
+		
 	try:
 		article = CBB_event_data_json['article']['story']
 	except:
@@ -267,6 +357,33 @@ def CBB_post_game(game_number):
 		article = re.sub(' +', ' ', article)
 		article = re.sub('\r', '', article)
 		article = re.sub('\n\n\n ', '\n', article)
+	
+	if notes != "":
+		short_box = short_box + notes + "\n"
+	short_box = short_box + visitor_short_box + home_short_box + "  Three-Point Goals--" + visitor_short_3s + home_short_3s + "Rebounds--" + visitor_short_reb + ", " + home_short_reb + ". Assists--" + visitor_short_ast + ", " + home_short_ast + ". Turnovers--" + visitor_short + " " + visitor_to + ", " + home_short + " " + home_to + ". Total Fouls--" + visitor_short_fls + ", " + home_short_fls + ". "
+	if visitor_fouled_out == "" and home_fouled_out == "":
+		short_box = short_box + "Fouled Out--None. "
+	elif visitor_fouled_out != "" and home_fouled_out == "":
+		short_box = short_box + "Fouled Out--" + visitor_fouled_out + ". "
+	elif visitor_fouled_out == "" and home_fouled_out != "":
+		short_box = short_box + "Fouled Out--" + home_fouled_out + ". "
+	else:
+		short_box = short_box + "Fouled Out--" + visitor_fouled_out + ", " + home_fouled_out + ". "
+	visitor_tech_fls = CBB_event_data_json['boxscore']['teams'][0]['statistics'][16]['displayValue']
+	home_tech_fls = CBB_event_data_json['boxscore']['teams'][1]['statistics'][16]['displayValue']
+	if visitor_tech_fls == "0" and home_tech_fls == "0":
+		short_box = short_box + "Technicals--None. "
+	elif visitor_tech_fls != "0" and home_tech_fls == "0":
+		short_box = short_box + "Technicals--" + visitor_short + " " + visitor_tech_fls + ". "
+	elif visitor_tech_fls == "0" and home_tech_fls != "0":
+		short_box = short_box + "Technicals--" + home_short + " " + home_tech_fls + ". "
+	else:
+		short_box = short_box + "Technicals--" + visitor_short + " " + visitor_tech_fls + ", " + home_short + " " + home_tech_fls + ". "
+	visitor_half = visitor_short + " " + str(int(CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['linescores'][0]['value'])) + ", "
+	home_half = home_short + " " + str(int(CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['linescores'][0]['value']))
+	short_box = short_box + "Halftime Score--" + visitor_half + home_half + "."
+	if ot_note != "":
+		short_box = short_box + " " + ot_note
 	
 	if home_rank == 99:
 		home_rank = ""
@@ -289,6 +406,8 @@ def CBB_post_game(game_number):
 	print(home, "("+home_record+home_conf_record+home_rank+")  "+home_add_spc, home_score, game_status, arena + ", " + game_date)
 	if notes != "":
 		print(notes)
+	if ot_note != "":
+		print(ot_note)
 	if headline != "":
 		print(headline)
 	print()
@@ -298,10 +417,12 @@ def CBB_post_game(game_number):
 	print()
 	console.print(team_comparison)
 	
+	print()
+	print(short_box)
+	
 	if article != "":
 		print()
 		print(article)
-	print()
 	print("----------------------------------------")
 
 def CBB_in_progress(game_number):
@@ -380,7 +501,7 @@ def CBB_in_progress(game_number):
 	except:
 		home_rank = 99
 		visitor_rank = 99
-	try:                                     #Not all broadcast, stops whole game if blank, watch other games, chg to no nat'l tv
+	try:
 		broadcast = CBB_data_json['events'][game_number]['competitions'][0]['broadcasts'][0]['names'][0]
 	except:
 		broadcast = "No Nat'l TV"
@@ -433,7 +554,6 @@ def CBB_pre_game(game_number):
 	except:
 		home_blank = ""
 	
-	#Visiting team info & data
 	visitor = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['team']['displayName']
 	try:
 		visitor_rebounds = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['statistics'][1]['displayValue']
@@ -446,7 +566,7 @@ def CBB_pre_game(game_number):
 	except:
 		visitor_blank = ""
 	
-	try:  #If any stat leaders are missing, just skip those stat lines
+	try:
 		home_leader_0 = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][0]['shortDisplayName']
 		home_leader_0_stat = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][0]['leaders'][0]['displayValue']
 		home_leader_0_player = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['leaders'][0]['leaders'][0]['athlete']['displayName']
@@ -469,7 +589,7 @@ def CBB_pre_game(game_number):
 	except:
 		leaders_blank = ""
 
-	try:   #Gather ranks if top 25 team; if not, rank, if available, is 99
+	try:
 		home_rank = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][0]['curatedRank']['current']
 		visitor_rank = CBB_data_json['events'][game_number]['competitions'][0]['competitors'][1]['curatedRank']['current']
 	except:
@@ -499,7 +619,7 @@ def CBB_pre_game(game_number):
 	except:
 		home_record = ""
 
-	try:   #Gather broadcaster, odds, & notes (such as tournament & round) as available
+	try:
 		broadcast = CBB_data_json['events'][game_number]['competitions'][0]['broadcasts'][0]['names'][0]
 	except:
 		broadcast = "No Nat'l TV"
@@ -537,9 +657,7 @@ def CBB_pre_game(game_number):
 #Main procedure
 
 if len(sys.argv) == 2:
-	url = "http://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?groups=50&limit=200&dates=" + str(sys.argv[1]) + "-" + str(sys.argv[1])
-elif len(sys.argv) == 3:
-	url = "http://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?groups=50&limit=300&dates=" + str(sys.argv[1]) + "-" + str(sys.argv[2])
+	url = "http://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?groups=50&limit=200&dates=" + str(sys.argv[1])
 else:
 	url = "http://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/scoreboard?groups=50&limit=200"
 
@@ -551,7 +669,6 @@ except:
 
 CBB_data_json = json.loads(CBB_today.read())
 
-#Iterate through each game, send to the proper def based on game state, drop out of loop once out of games; game & game_number parm is event index
 for game in range(0, 200):
 	try: 
 		game_state = CBB_data_json['events'][game]['status']['type']['state']
