@@ -35,6 +35,34 @@ The NFL box scores, SQLite database load, and reports have some additions.
 * Reception percentages have been added to the main report script.
 * Also added to the end of the main report script are the team ranking tables for the following aggregate statistics: Offensive & Defensive Points per Game, Offensive & Defensive Total Yards per Game, Offensive & Defensive Rushing Yards per Game, and Offensive & Defensive Passing Yards per Game.
 
+## NFL database utilities
+
+1. To set up your own local copy of the SQLite database, run `python3 CreateNFLStatsSqliteDB.py new_database_file_name.sqlite`.
+2. Updates need to be made daily, game date being specified in YYYYMMDD format,  `python3 -u ESPNNFLAPISqlite.py YYYYMMDD database_file_name.sqlite`.
+3. Use a SQLite tool (my favorite is DB Browser for SQLite) to access the data and view the schema. For example, to view the rushing season totals for carries, total yards, and total touchdowns, grouped by runner, & sorted descending by yards:
+
+```
+SELECT display_name as Name, 
+team_abbr as Team, 
+SUM(rushes) as Rushes, 
+SUM(yards_rushing) as TotalYards, 
+SUM(tds_rushing) as TDs,
+MAX(long) as Long
+FROM rushing
+GROUP BY display_name
+ORDER BY TotalYards DESC;
+```
+
+Two text-based reports are also available, ESPNNFLAPISqliteReport & ESPNNFLAPISqliteIndividualStatsReport. To run, download the Python scripts, and use  [the last two command lines specified above](#new-nfl-updates-for-august-2026). The Sqlite Report contains full team & player stats, by team, league leaders, and team rankings. The Individual Stats report, has by-game box scores for each individual player on every team, so it is much longer. Note that page break characters are included, so they format nicely in a word processing program. Check the [special notes](#football-database-notes) for further information.
+
+### Football Database Notes
+
+* ESPN commits a lot of database changes for the new week on Tuesday late afternoons, Eastern US Time, making access unavailable.
+* The College Football box scores are set up for games involving FBS teams only. The API, in general, is quite incomplete for regular-season games where both teams are in the FCS.
+* The database load script (ESPNNFLAPISqlite.py) simply overwrites previously loaded games, should a game's statistics be loaded twice.
+* Passing yards in the team totals section are "net", which subtracts sack yardage; player totals do not subtract sacks.
+* If a player is traded, that player's statistics will reported showing the stats earned for each team.
+
 ## Soccer Final Score Daily Roundup Instructions
 
 The soccer API scoreboard call has a nice summary of stats, when available (otherwise just shows as 0's), a game summary, including goal scorers & card recipients, league name, date, stadium, and any available brief game write-up. The script (ESPNAPISoccerFinals.py) has been made flexible in order to accomodate only the leagues that you might be interested in.
@@ -57,34 +85,6 @@ Add that URL to a text file, if desired. Add any other leagues that you are inte
 
 As usual, redirect the output to a file if you wish, and be sure to specify any paths if any files are in a different directory.
 
-## NFL database utilities
-
-1. To set up your own local copy of the SQLite database, run `python3 CreateNFLStatsSqliteDB.py new_database_file_name.sqlite`.
-2. Updates need to be made daily, game date being specified in YYYYMMDD format,  `python3 -u ESPNNFLAPISqlite.py YYYYMMDD database_file_name.sqlite`.
-3. Use a SQLite tool (my favorite is DB Browser for SQLite) to access the data and view the schema. For example, to view the rushing season totals for carries, total yards, and total touchdowns, grouped by runner, & sorted descending by yards:
-
-```
-SELECT display_name as Name, 
-team_abbr as Team, 
-SUM(rushes) as Rushes, 
-SUM(yards_rushing) as TotalYards, 
-SUM(tds_rushing) as TDs,
-MAX(long) as Long
-FROM rushing
-GROUP BY display_name
-ORDER BY TotalYards DESC;
-```
-
-Two text-based reports are also available, ESPNNFLAPISqliteReport & ESPNNFLAPISqliteIndividualStatsReport. To run, download the Python scripts, and use  [the last two command lines specified above](#new-nfl-updates-for-august-2026). The Sqlite Report contains full team & player stats, by team, league leaders, and team rankings. The Individual Stats report, has by-game box scores for each individual player on every team, so it is much longer. Note that page break characters are included, so they format nicely in a word processing program. Check the [special notes](#football-database-notes) for further information.
-
 ### Rich library note
 
 Most of the Python libraries are included in most standard Python installs, however, double check & install if necessary. Rich will likely need to be installed in most cases, so use `pip install rich` on the regular command line ([Rich site](https://pypi.org/project/rich/)). If nagged about forced, unnecessary "external management", use `sudo apt install python3-rich` (generally, `sudo apt install python3-{package-name}`).
-
-### Football Database Notes
-
-* ESPN commits a lot of database changes for the new week on Tuesday late afternoons, Eastern US Time, making access unavailable.
-* The College Football box scores are set up for games involving FBS teams only. The API, in general, is quite incomplete for regular-season games where both teams are in the FCS.
-* The database load script (ESPNNFLAPISqlite.py) simply overwrites previously loaded games, should a game's statistics be loaded twice.
-* Passing yards in the team totals section are "net", which subtracts sack yardage; player totals do not subtract sacks.
-* If a player is traded, that player's statistics will reported showing the stats earned for each team.
