@@ -1,19 +1,6 @@
 # ESPN-API
 
-## Update 9-16-26: ESPN has blocked date ranges in Scoreboard API calls as of 9-15-26. I've always suggested that users use one date at a time anyway, but almost all of the scripts in the repository will require updating. I will begin work on changing & testing new versions.
-
-If you'd like in the interim, change the line in almost all of the Python scripts from the format (just delete the extra date concatenation):
-
-`url = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=" + date_arg + "-" + date_arg`
-
-to
-
-`url = "https://site.api.espn.com/apis/site/v2/sports/baseball/mlb/scoreboard?dates=" + date_arg`
-
----
 Miscellaneous Python command line utilities to access the ESPN API. Primarily designed for post-game box scores, but they can be used for game preview data as available, and in-game partial box scores. Includes utilities for maintaining a NFL SQLite database throughout the season.
-
-**Note that there are [updates for the upcoming NFL season](#new-nfl-updates-for-august-2026), as well as a brand new system for [downloading a daily soccer final score roundup](#soccer-final-score-daily-roundup-instructions).**
 
 ## Basic Instructions for box score scripts (read [update section](#new-nfl-updates-for-august-2026) before use)
 
@@ -23,7 +10,7 @@ Download .py file to your computer & use python3 to run. Note that you must have
 
 Use python3 -u to help reduce API caching. Date parameter is optional, but the API revolves around date-based queries. If no date is specified prior to around 10 AM US Eastern time, games from the previous day are supplied. After that time, the current day's games are returned.
 
-To specify a day, most scripts require that only one date may be used per run, in order to reduce API data throttling. Some scripts allow for a date range, or use a shell script to get box scores for multiple days. Use the redirection operator (>) in the command to save box scores to a file.
+As of September 2026, the API only allows for one date to be specified. Use a shell script to get box scores for multiple days. Use the redirection operator (>) in the command to save box scores to a file.
 
 This project is posted under the GNU General Public License v3.0. If you intend to sell a product based on this code, or release a modified version of this code to the public, that code must also carry this license & be released to the public as open source.
 
